@@ -46,7 +46,7 @@ using UnityEngine.EventSystems;
 // 2. 위에 것을 아예 못하겠으면. 최소한 UI 끌 수 있는 x 버튼 만들기]
 // 이것을 하려면 UI가 켜져있는지 안 켜져있는지 확인할 수 있는 방법을 준비해야합니다.
 
-public abstract class BaseTurret : ClickDetector
+public abstract class BaseTurret : MonoBehaviour
 {
     public TurretSpace turretSpace;
     public Vector3 spacePos;
@@ -114,7 +114,7 @@ public abstract class BaseTurret : ClickDetector
         if(this.isInstalledTurret){
             return;
         }
-       
+         
         if(collider.GetComponent<TurretSpace>() == null)
         {
             return;
@@ -304,8 +304,7 @@ public abstract class BaseTurret : ClickDetector
             // turret 위치는 오른쪽 위
             direction = Direction.TopRight;
         }
-        //Debug.Log(turretSpace.gameObject);
-        Debug.Log("help!");
+   
         switch (direction) {
             case Direction.TopLeft:
                 worldPoint.x += turretSpace.spriteBounds.x/2;
@@ -365,6 +364,13 @@ public abstract class BaseTurret : ClickDetector
         isShowingUI = true;
     }
 
+    void OnMouseDown()
+    {
+        if(this.isInstalledTurret){
+            this.InstantiateUI();
+        }
+    }
+    
     public void DeleteUI(Vector3 mousePos)
     {
         Debug.Log(mousePos);
