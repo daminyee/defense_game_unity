@@ -19,10 +19,24 @@ public class TurretUI : MonoBehaviour
     public void Upgrade()
     {
         turret.UpgradeTurret();
+        if(StaticValues.GetInstance().gold >= turret.upgradePrice)
+        {
+            StaticValues.GetInstance().gold -= turret.upgradePrice;
+            turret.turretSpace.ShowGetGold(turret.upgradePrice,false);
+            turret.sellPrice += turret.upgradePrice/2;
+        }
+    }
+
+    public void Sell()
+    {
+        //turret.SellTurret();
+        turret.SellTurret();
+        Destroy(this.gameObject);
     }
 
     public void DestroyUI() 
     {
+        turret.isShowingUI = false;
         Destroy(gameObject);
     }
 }

@@ -225,6 +225,7 @@ MonoBehaviour:
   currentWayPointIndex: 0
   isSlowed: 0
   hp: 2
+  gold: 10
   originalSpeed: 1
   speed: 1
 --- !u!61 &2104671455683301146

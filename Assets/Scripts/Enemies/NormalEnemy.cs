@@ -1,18 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class TankingEnemy : BaseEnemy
+public class NormalEnemy : BaseEnemy
 {
-    // Start is called before the first frame update
     void Start()
     {
-        this.Initialize();
+
     }
 
     // Update is called once per frame
     void Update()
-    {
+    {   
         this.MoveToNextWayPoint();
     }
+
+ 
 }

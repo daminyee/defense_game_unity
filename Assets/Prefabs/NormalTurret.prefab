@@ -112,10 +112,13 @@ MonoBehaviour:
   attackSpeed: 0
   attackCoolCount: 0
   price: 30
+  upgradePrice: 15
+  sellPrice: 0
   isInValidSpace: 0
   isHighlightingAnyTurretSpace: 0
   isInstalledTurret: 0
   isSelected: 0
+  tripleTurretPrefab: {fileID: 1845641371026388423, guid: 91f42a06318442945957ac1822fa7d47, type: 3}
 --- !u!61 &3590665439325161137
 BoxCollider2D:
   m_ObjectHideFlags: 0

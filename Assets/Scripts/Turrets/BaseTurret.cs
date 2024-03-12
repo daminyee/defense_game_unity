@@ -4,6 +4,7 @@ using Mono.Cecil.Cil;
 using UnityEngine;
 using System;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 // 숙제 일요일까지 (1월 24일)
 // 1. 터렛을 놓으면 아무데나 놓이는 게 아닌, 딱 중앙에 배치하게 끔 하기
@@ -46,6 +47,11 @@ using UnityEngine.EventSystems;
 // 2. 위에 것을 아예 못하겠으면. 최소한 UI 끌 수 있는 x 버튼 만들기]
 // 이것을 하려면 UI가 켜져있는지 안 켜져있는지 확인할 수 있는 방법을 준비해야합니다.
 
+// 일요일까지 (3월 10일)
+// 1. attackrange에 따라사 ray cast가 되게끔 하기 (attackRange에 거리 변수 하나 필요할 것)
+// 2. 판매로직 구현하기 (판매하면, 업그레이드 비용 포함해서 돈을 늘려야 돼)
+// 3. 터렛 업그레이드하면 저 새로 만든 3개 쏘는 걸로 바뀌게끔 해보기 
+
 public abstract class BaseTurret : MonoBehaviour
 {
     public TurretSpace turretSpace;
@@ -68,6 +74,8 @@ public abstract class BaseTurret : MonoBehaviour
     public float attackCoolCount;
 
     public int price;
+    public int upgradePrice;
+    public int sellPrice;
     
     public bool isInValidSpace = false;
     public bool isHighlightingAnyTurretSpace = false;
@@ -80,12 +88,18 @@ public abstract class BaseTurret : MonoBehaviour
 
     public abstract void Attack();
     public abstract void UpgradeTurret();
+    //public abstract void SellTurret();
 
 
-    protected void Initialize() 
+    public void Initialize(bool isSelected, Camera mainCamera, Canvas canvasUI) 
     {
+        this.isSelected = isSelected;
+        this.mainCamera = mainCamera;
+        this.canvasUI = canvasUI;
+
         this.enemiesToAttack = new Queue<BaseEnemy>();
         this.isSelected = true;
+        this.sellPrice = price/2;
     }
 
     void UpdateDistance(TurretSpace turretSpaceObject, float distance)
@@ -177,8 +191,8 @@ public abstract class BaseTurret : MonoBehaviour
         StaticValues.GetInstance().gold -= this.price;
         MakeAttackRangeInvisible();
         
-        Debug.Log("Installed turret");
-        Debug.Log(turretSpace);
+        //Debug.Log("Installed turret");
+        //Debug.Log(turretSpace);
         foreach (var turretSpaceDistance in turretSpaceDistances)
         {
             turretSpaceDistance.Key.UnhighlightSpace();
@@ -186,6 +200,9 @@ public abstract class BaseTurret : MonoBehaviour
         this.isSelected = false;
         this.isInstalledTurret = true;
         this.turretSpaceDistances = null;
+
+        turretSpace.installedTurret = this;
+        turretSpace.ShowGetGold(this.price,false);
         // if(turretSpace != null)
         // {
         //     turretSpace.isInstalled = true;
@@ -207,6 +224,25 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void AttackEnemy()
     {
+        var range = this.attackRange.GetComponent<CircleCollider2D>().bounds.size;
+        
+        // get the turret direction
+        var doAttack = false;
+        // shoot debug ray
+        var ray = new Ray(this.transform.position, this.transform.right);
+        var hit = Physics2D.RaycastAll(ray.origin, ray.direction, range.x/2); // 거리를 조절해야함
+        foreach (var h in hit)
+        {
+            if(h.collider.GetComponent<BaseEnemy>() != null)
+            {
+                doAttack = true;
+                break;
+            }
+        }
+        if(!doAttack)
+        {
+            return;
+        }
         Attack();
     }
 
@@ -226,7 +262,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     private void SetTargetEnemy(BaseEnemy enemy)
     {
-        Debug.Log("SetTargetEnemy " + enemy);
+        //Debug.Log("SetTargetEnemy " + enemy);
         this.targetEnemy = enemy;
     }
     // enenmy 죽었거나, 영역을 벗어났을 때
@@ -261,7 +297,7 @@ public abstract class BaseTurret : MonoBehaviour
     {
         attackRange.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.5f);
     }
-    void MakeAttackRangeInvisible()
+    public void MakeAttackRangeInvisible()
     {
         attackRange.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, 0f);
     }
@@ -278,7 +314,8 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void InstantiateUI()
     {
-        Debug.Log("instantiate triggered!");
+        if(isShowingUI) return;
+
         var centerPos = StaticValues.GetInstance().centerPos;
         Vector3 worldPoint = this.transform.position;
 
@@ -361,31 +398,42 @@ public abstract class BaseTurret : MonoBehaviour
 
         rectTransform.anchoredPosition = localPoint;
 
-        isShowingUI = true;
+        //isShowingUI = true;
     }
 
-    void OnMouseDown()
-    {
-        if(this.isInstalledTurret){
-            this.InstantiateUI();
-        }
-    }
     
-    public void DeleteUI(Vector3 mousePos)
-    {
-        Debug.Log(mousePos);
-        // Vector3 screenPoint = mainCamera.
-        // Debug.Log(screenPoint);
-        Vector2 localPoint;
 
-        Debug.Log(RectTransformUtility.ScreenPointToLocalPointInRectangle(savedTurretUI.GetComponent<RectTransform>(), mousePos, canvasUI.worldCamera, out localPoint));
-        if(!RectTransformUtility.ScreenPointToLocalPointInRectangle(savedTurretUI.GetComponent<RectTransform>(), mousePos, canvasUI.worldCamera, out localPoint))
-        {
-            Debug.Log("삭제됨");
-            Destroy(savedTurretUI); //instantiatedTurretUI를 가져와서 삭제해야함---------
-            isShowingUI = false;
-        }
+    public void SellTurret()
+    {
+        StaticValues.GetInstance().gold += this.sellPrice;
+        StaticValues.GetInstance().isShowingUI = false;
+        this.turretSpace.ShowGetGold(this.upgradePrice,true);
+        turretSpace.installedTurret = null;
+        Destroy(this.gameObject);
     }
+
+    // void OnMouseDown() // collider가 있으면 클릭가능
+    // {
+    //     if(this.isInstalledTurret){
+    //         this.InstantiateUI();
+    //     }
+    // }
+    
+    // public void DeleteUI(Vector3 mousePos)
+    // {
+    //     Debug.Log(mousePos);
+    //     // Vector3 screenPoint = mainCamera.
+    //     // Debug.Log(screenPoint);
+    //     Vector2 localPoint;
+
+    //     Debug.Log(RectTransformUtility.ScreenPointToLocalPointInRectangle(savedTurretUI.GetComponent<RectTransform>(), mousePos, canvasUI.worldCamera, out localPoint));
+    //     if(!RectTransformUtility.ScreenPointToLocalPointInRectangle(savedTurretUI.GetComponent<RectTransform>(), mousePos, canvasUI.worldCamera, out localPoint))
+    //     {
+    //         Debug.Log("삭제됨");
+    //         Destroy(savedTurretUI); //instantiatedTurretUI를 가져와서 삭제해야함---------
+    //         isShowingUI = false;
+    //     }
+    // }
 
     
     // private Vector3 WorldToScreenPoint(Vector2 screenPoint)

@@ -130,12 +130,18 @@ MonoBehaviour:
   spacePos: {x: 0, y: 0, z: 0}
   bulletPrefab: {fileID: 3750199523848429472, guid: 3ccd0e9d8391ea94c8f5169b5c8573b1, type: 3}
   attackRange: {fileID: 3609923556699477402}
+  canvasUI: {fileID: 0}
+  mainCamera: {fileID: 0}
+  turretUI: {fileID: 5521742912535323514, guid: 4b57276f384950548839394cb4f0c5cb, type: 3}
+  isShowingUI: 0
   attackPower: 0
   attackSpeed: 0
   attackCoolCount: 0
-  price: 0
+  price: 40
+  upgradePrice: 30
   isInValidSpace: 0
   isHighlightingAnyTurretSpace: 0
+  isInstalledTurret: 0
   isSelected: 0
 --- !u!1 &3609923556699477402
 GameObject:

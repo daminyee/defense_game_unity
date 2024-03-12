@@ -2,21 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SlowTurret : BaseTurret
+public class TripleTurret : BaseTurret
 {
-    private float slowPower;
+    public GameObject leftBody;
+    public GameObject rightBody;
     void Start()
     {
-        this.Initialize();
-        this.attackPower = 0.5f;
+        this.attackPower = 0.7f;
         this.attackSpeed = 0.5f;
-        slowPower = 0.9f;
     }
 
     void Update()
     {
         if(!this.isInstalledTurret) return;
-
+        
         WatchEnemy();
         if(targetEnemy != null)
         {
@@ -27,20 +26,24 @@ public class SlowTurret : BaseTurret
             }
         }
         attackCoolCount += Time.deltaTime * attackSpeed;
+
+       
     }
 
     public override void Attack()
     {
         var bullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
         bullet.GetComponent<Bullet>().attackDamage = this.attackPower;
-        bullet.GetComponent<Bullet>().slowPower = this.slowPower;
-        bullet.GetComponent<Bullet>().isSlowBullet = true;
+
+        var leftBullet = Instantiate(bulletPrefab, this.leftBody.transform.position, this.transform.rotation);
+        leftBullet.GetComponent<Bullet>().attackDamage = this.attackPower/3;
+        var rightBullet = Instantiate(bulletPrefab, this.rightBody.transform.position, this.transform.rotation);
+        rightBullet.GetComponent<Bullet>().attackDamage = this.attackPower/3;
     }
 
     public override void UpgradeTurret()
     {
         this.attackPower += 0.5f;
-        this.attackSpeed += 0.2f;
-        this.slowPower += 0.2f;
+        this.attackSpeed += 0.5f;
     }
 }

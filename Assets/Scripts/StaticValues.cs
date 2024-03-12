@@ -33,6 +33,8 @@ public class StaticValues
 
     public TurretUI? openTurretUI = null;
 
+    public bool isShowingUI = false;
+
     public Level[] levels = new Level[3]
     {
         new Level(5, 0, 0),

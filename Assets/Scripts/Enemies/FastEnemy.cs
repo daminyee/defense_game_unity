@@ -7,7 +7,6 @@ public class FastEnemy : BaseEnemy
     // Start is called before the first frame update
     void Start()
     {
-        this.Initialize();
     }
 
     // Update is called once per frame

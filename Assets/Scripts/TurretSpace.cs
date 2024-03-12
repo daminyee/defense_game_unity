@@ -22,6 +22,54 @@ public class TurretSpace : MonoBehaviour
         
     }
 
+    public void ShowGetGold(int usedGold, bool getGold)
+    {
+        // create new text UI element
+        // Debug.Log("showusedgold");
+        GameObject usedGoldText = new GameObject("UsedGoldText");
+        usedGoldText.transform.SetParent(installedTurret.canvasUI.transform, false);
+        usedGoldText.AddComponent<RectTransform>();
+        usedGoldText.AddComponent<CanvasRenderer>();
+        usedGoldText.AddComponent<UnityEngine.UI.Text>();
+        if(getGold)
+        {
+            usedGoldText.GetComponent<UnityEngine.UI.Text>().text = "+" + usedGold;
+            usedGoldText.GetComponent<UnityEngine.UI.Text>().color = Color.green;
+        } else
+        {
+            usedGoldText.GetComponent<UnityEngine.UI.Text>().text = "-" + usedGold;
+            usedGoldText.GetComponent<UnityEngine.UI.Text>().color = Color.red;
+        }
+        usedGoldText.GetComponent<UnityEngine.UI.Text>().fontSize = 80;
+        usedGoldText.GetComponent<UnityEngine.UI.Text>().alignment = TextAnchor.MiddleCenter;
+        // change rect transform size
+        usedGoldText.GetComponent<RectTransform>().sizeDelta = new Vector2(230, 100);
+        usedGoldText.GetComponent<UnityEngine.UI.Text>().font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+        // set position
+        Vector3 screenPoint = installedTurret.mainCamera.WorldToScreenPoint(this.transform.position);
+        RectTransform rectTransform = usedGoldText.GetComponent<RectTransform>();
+        Vector2 localPoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(installedTurret.canvasUI.GetComponent<RectTransform>(), screenPoint, installedTurret.canvasUI.worldCamera, out localPoint);
+        rectTransform.anchoredPosition = localPoint;
+
+        // usedGoldText.GetComponent<RectTransform>().transform.position = textPos;
+        // localPoint.x = 0; // 해당 버튼 위치에 따라서 조정할 필요가 있다
+        // localPoint.y = 0;
+
+        StartCoroutine(GoUpAndDestroy(usedGoldText));
+    }
+
+    public IEnumerator GoUpAndDestroy(GameObject usedGoldText)
+    {
+        float time = 0;
+        while (time < 0.6f)
+        {
+            time += Time.deltaTime;
+            usedGoldText.transform.position += new Vector3(0, 0.008f, 0);
+            yield return null;
+        }
+        Destroy(usedGoldText);
+    }
     // void OnTriggerEnter2D(Collider2D collider)
     // {
     //     var draggingTurret = collider.GetComponent<BaseTurret>();
