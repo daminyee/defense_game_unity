@@ -2,14 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IceBullet : MonoBehaviour
+public class SniperBullet : MonoBehaviour
 {
     public float attackDamage;
-    public float slowPower;
+
     public Vector2 shootingOrigin;
     public bool shouldDestroyWhenOutOfRange;
-
-    public GameObject slowField;
     void Start()
     {
         
@@ -17,7 +15,7 @@ public class IceBullet : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(6 * Time.deltaTime, 0, 0);
+        transform.Translate(18 * Time.deltaTime, 0, 0);
     }
 
     void OnTriggerEnter2D(Collider2D collider)
@@ -25,19 +23,20 @@ public class IceBullet : MonoBehaviour
         var enemy = collider.GetComponent<BaseEnemy>();
         if(enemy != null)
         {
-            Debug.Log(slowField);
-            var newSlowField = Instantiate(slowField, enemy.transform.position, Quaternion.identity);
-            newSlowField.GetComponent<SlowField>().Initialize(slowPower, attackDamage);
-            
-            Destroy(this.gameObject);
+            enemy.GotHit(attackDamage);
         }
     }
+    void OnBecameInvisible() //화면밖으로 나가 보이지 않게 되면 호출이 된다.
+    {
+        Destroy(this.gameObject); //객체를 삭제한다.
+    }
 
-    public void Initialize(float attackDamage, Vector2 shootingOrigin, float slowPower, bool shouldDestroyWhenOutOfRange = true)
+    public void Initialize(float attackDamage, Vector2 shootingOrigin, bool shouldDestroyWhenOutOfRange = true)
     {
         this.attackDamage = attackDamage;
+        //this.attackRange = attackRange;
+        //this.attackRangeRadius = attackRangeRadius;
         this.shootingOrigin = shootingOrigin;
-        this.slowPower = slowPower;
         this.shouldDestroyWhenOutOfRange = shouldDestroyWhenOutOfRange;
     }
 }

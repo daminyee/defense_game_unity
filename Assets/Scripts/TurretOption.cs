@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 
 public class TurretOption : ClickDetector
 {
-    public BaseTurret draggingTurretObject = null;
-    public BaseTurret turretPrefab;
+    public GameObject draggingTurretObject = null;
+    public GameObject turretPrefab;
     public Canvas canvasUI;
     public Camera mainCamera;
 
@@ -30,7 +30,7 @@ public class TurretOption : ClickDetector
         if (draggingTurretObject == null)
         {
             draggingTurretObject = Instantiate(turretPrefab, worldPoint, Quaternion.identity);
-            draggingTurretObject.Initialize(true, this.mainCamera, this.canvasUI);
+            draggingTurretObject.GetComponent<BaseTurret>().Initialize(true, this.mainCamera, this.canvasUI);
         }
         else
         {

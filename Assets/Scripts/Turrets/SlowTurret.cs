@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class SlowTurret : BaseTurret
 {
-    int upgradeCount;
-    public GameObject blizardTurretPrefab;
-
     private float slowPower;
     void Start()
     {
@@ -33,30 +30,29 @@ public class SlowTurret : BaseTurret
 
     public override void Attack()
     {
-        var bullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
-        bullet.GetComponent<Bullet>().attackDamage = this.attackPower;
-        bullet.GetComponent<Bullet>().slowPower = this.slowPower;
-        bullet.GetComponent<Bullet>().isSlowBullet = true;
+        var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
+        var bullet = newBullet.GetComponent<Bullet>();
+        bullet.Initialize(this.attackPower,this.transform.position, this.slowPower, true);
     }
 
-    public override void UpgradeTurret()
-    {
-        this.attackPower += 0.2f;
-        this.attackSpeed += 0.2f;
-        upgradeCount += 1;
-        if(upgradeCount >= 3)
-        {
-            GameObject newTurretGameObject = Instantiate(blizardTurretPrefab, this.transform.position, Quaternion.identity);
-            BlizardTurret blizardTurret= newTurretGameObject.GetComponent<BlizardTurret>();
+    // public override void UpgradeTurret()
+    // {
+    //     this.attackPower += 0.2f;
+    //     this.attackSpeed += 0.2f;
+    //     upgradeCount += 1;
+    //     if(upgradeCount >= 3)
+    //     {
+    //         GameObject newTurretGameObject = Instantiate(blizardTurretPrefab, this.transform.position, Quaternion.identity);
+    //         BlizardTurret blizardTurret= newTurretGameObject.GetComponent<BlizardTurret>();
 
-            turretSpace.installedTurret = blizardTurret;
-            blizardTurret.turretSpace = this.turretSpace;
-            blizardTurret.canvasUI = this.canvasUI;
-            blizardTurret.mainCamera = this.mainCamera;
-            blizardTurret.isInstalledTurret = true;
-            blizardTurret.MakeAttackRangeInvisible();
+    //         turretSpace.installedTurret = blizardTurret;
+    //         blizardTurret.turretSpace = this.turretSpace;
+    //         blizardTurret.canvasUI = this.canvasUI;
+    //         blizardTurret.mainCamera = this.mainCamera;
+    //         blizardTurret.isInstalledTurret = true;
+    //         blizardTurret.MakeAttackRangeInvisible();
 
-            Destroy(this.gameObject);
-        }
-    }
+    //         Destroy(this.gameObject);
+    //     }
+    // }
 }

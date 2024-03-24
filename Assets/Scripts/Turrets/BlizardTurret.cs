@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class BlizardTurret : BaseTurret
 {
-    private float slowPower;
+    public float slowPower;
     void Start()
     {
         this.attackPower = 0.5f;
-        this.attackSpeed = 0.5f;
-        slowPower = 0.3f;
+        this.attackSpeed = 0.13f;
+        slowPower = 0.5f;
     }
 
     void Update()
@@ -30,16 +30,15 @@ public class BlizardTurret : BaseTurret
 
     public override void Attack()
     {
-        var bullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
-        bullet.GetComponent<Bullet>().attackDamage = this.attackPower;
-        bullet.GetComponent<Bullet>().slowPower = this.slowPower;
-        // bullet.GetComponent<Bullet>().isSlowBullet = true;
+        var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
+        var bullet = newBullet.GetComponent<IceBullet>();
+        bullet.Initialize(this.attackPower,this.transform.position, this.slowPower);
     }
 
-    public override void UpgradeTurret()
-    {
-        this.attackPower += 0.5f;
-        this.attackSpeed += 0.2f;
-        this.slowPower += 0.1f;
-    }
+    // public override void UpgradeTurret()
+    // {
+    //     this.attackPower += 0.5f;
+    //     this.attackSpeed += 0.2f;
+    //     this.slowPower += 0.1f;
+    // }
 }

@@ -6,8 +6,6 @@ using UnityEngine.EventSystems;
 
 public class NormalTurret : BaseTurret
 {
-    int upgradeCount;
-    public GameObject tripleTurretPrefab;
     void Start()
     {
         this.attackPower = 1;
@@ -39,31 +37,32 @@ public class NormalTurret : BaseTurret
 
     public override void Attack()
     {
-        var bullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
-        bullet.GetComponent<Bullet>().attackDamage = this.attackPower;
+        var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
+        var bullet = newBullet.GetComponent<Bullet>();
+        bullet.Initialize(this.attackPower,this.transform.position, 0, false);
     }
 
-    public override void UpgradeTurret()
-    {
-        this.attackPower += 1;
-        this.attackSpeed += 0.5f;
-        upgradeCount += 1;
-        if(upgradeCount >= 3)
-        {
-            GameObject newTurretGameObject = Instantiate(tripleTurretPrefab, this.transform.position, Quaternion.identity);
-            BlizardTurret tripleTurret= newTurretGameObject.GetComponent<BlizardTurret>();
+//     public void UpgradeTurret()
+//     {
+//         this.attackPower += 1;
+//         this.attackSpeed += 0.5f;
+//         upgradeCount += 1;
+//         if(upgradeCount >= 3)
+//         {
+//             GameObject newTurretGameObject = Instantiate(tripleTurretPrefab, this.transform.position, Quaternion.identity);
+//             BlizardTurret tripleTurret= newTurretGameObject.GetComponent<BlizardTurret>();
 
-            turretSpace.installedTurret = tripleTurret;
-            tripleTurret.turretSpace = this.turretSpace;
-            tripleTurret.canvasUI = this.canvasUI;
-            tripleTurret.mainCamera = this.mainCamera;
-            tripleTurret.isInstalledTurret = true;
-            tripleTurret.MakeAttackRangeInvisible();
+//             turretSpace.installedTurret = tripleTurret;
+//             tripleTurret.turretSpace = this.turretSpace;
+//             tripleTurret.canvasUI = this.canvasUI;
+//             tripleTurret.mainCamera = this.mainCamera;
+//             tripleTurret.isInstalledTurret = true;
+//             tripleTurret.MakeAttackRangeInvisible();
 
-            Destroy(this.gameObject);
-        }
-    }
-    // public override void SellTurret()
-    // {
-    // }
+//             Destroy(this.gameObject);
+//         }
+//     }
+//     // public override void SellTurret()
+//     // {
+//     // }
 }

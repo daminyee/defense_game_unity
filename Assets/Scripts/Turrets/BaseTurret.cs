@@ -67,7 +67,7 @@ public abstract class BaseTurret : MonoBehaviour
 
 
     public BaseEnemy targetEnemy { get; private set;}
-    public Queue<BaseEnemy> enemiesToAttack;
+    public Queue<BaseEnemy> enemiesToAttack = new Queue<BaseEnemy>();
 
     public float attackPower;
     public float attackSpeed;
@@ -87,19 +87,61 @@ public abstract class BaseTurret : MonoBehaviour
     public Dictionary<TurretSpace, float> turretSpaceDistances = new Dictionary<TurretSpace, float>();
 
     public abstract void Attack();
-    public abstract void UpgradeTurret();
+
+    public float attackPowerDelta;
+    public float attackSpeedDelta;
+    public int upgradeLevel;
+    public int upgradeCount = 0;
+
+    public List<GameObject> upgradePrefabs; // 어떤 터렛은 여러번 prefab가 변경 가능하기 떄문
+
+
+    public void UpgradeTurret()
+    {
+        this.attackPower += attackPowerDelta;
+        this.attackSpeed += attackSpeedDelta;
+        upgradeLevel += 1;
+
+        if(upgradeLevel >= 3 && upgradePrefabs[upgradeCount] != null)
+        {
+            GameObject newTurretGameObject = Instantiate(upgradePrefabs[upgradeCount], this.transform.position, Quaternion.identity);
+            BaseTurret upgradeTurret= newTurretGameObject.GetComponent<BaseTurret>();
+            CopyDataToNewTurret(upgradeTurret);
+            upgradeTurret.MakeAttackRangeInvisible();
+
+            Destroy(this.gameObject);
+        }
+    }
     //public abstract void SellTurret();
 
 
     public void Initialize(bool isSelected, Camera mainCamera, Canvas canvasUI) 
+    // Start와 동일한 역할을 하는 함수
     {
         this.isSelected = isSelected;
         this.mainCamera = mainCamera;
         this.canvasUI = canvasUI;
 
         this.enemiesToAttack = new Queue<BaseEnemy>();
+        this.turretSpaceDistances = new Dictionary<TurretSpace, float>();
         this.isSelected = true;
         this.sellPrice = price/2;
+    }
+
+
+
+    public void CopyDataToNewTurret(BaseTurret newTurret)
+    {
+        turretSpace.installedTurret = newTurret;
+        newTurret.turretSpace = this.turretSpace;
+        newTurret.canvasUI = this.canvasUI;
+        newTurret.mainCamera = this.mainCamera;
+        newTurret.isInstalledTurret = true;
+
+        newTurret.upgradePrefabs = this.upgradePrefabs;
+        newTurret.upgradeCount = this.upgradeCount + 1;
+        newTurret.turretSpaceDistances = this.turretSpaceDistances;
+        newTurret.enemiesToAttack = this.enemiesToAttack;
     }
 
     void UpdateDistance(TurretSpace turretSpaceObject, float distance)
@@ -219,7 +261,7 @@ public abstract class BaseTurret : MonoBehaviour
         {
             this.SetTargetEnemy(enemy);
         }
-        this.enemiesToAttack.Enqueue(enemy);
+        this.enemiesToAttack.Enqueue(enemy); //오류!
     }
 
     public void AttackEnemy()
@@ -269,7 +311,7 @@ public abstract class BaseTurret : MonoBehaviour
     public void DeleteEnemy(BaseEnemy enemy)
     {
         // queue에 아무것도 없으면
-        if (this.enemiesToAttack.Count == 0)
+        if (this.enemiesToAttack.Count == 0) //오류!
         {
             this.SetTargetEnemy(null);
             return;

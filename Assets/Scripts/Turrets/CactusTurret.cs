@@ -37,15 +37,16 @@ public class CactusTurret : BaseTurret
         {
             var turretRotation = this.transform.rotation;
             attackRotation = Quaternion.Euler(0, 0, turretRotation.eulerAngles.z + i);
-            var bullet = Instantiate(bulletPrefab, this.transform.position, attackRotation);
-            bullet.GetComponent<Bullet>().attackDamage = this.attackPower;
+            var newBullet = Instantiate(bulletPrefab, this.transform.position, attackRotation);
+            var bullet = newBullet.GetComponent<Bullet>();
+            bullet.Initialize(this.attackPower,this.transform.position, 0, false);
         }
 
 
     }
-    public override void UpgradeTurret()
-    {
-        this.attackPower += 1;
-        this.attackSpeed += 0.5f;
-    }
+    // public override void UpgradeTurret()
+    // {
+    //     this.attackPower += 1;
+    //     this.attackSpeed += 0.5f;
+    // }
 }

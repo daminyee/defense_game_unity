@@ -118,7 +118,12 @@ MonoBehaviour:
   isHighlightingAnyTurretSpace: 0
   isInstalledTurret: 0
   isSelected: 0
-  tripleTurretPrefab: {fileID: 1845641371026388423, guid: 91f42a06318442945957ac1822fa7d47, type: 3}
+  attackPowerDelta: 0
+  attackSpeedDelta: 0
+  upgradeLevel: 0
+  upgradeCount: 0
+  upgradePrefabs:
+  - {fileID: 1845641371026388423, guid: 91f42a06318442945957ac1822fa7d47, type: 3}
 --- !u!61 &3590665439325161137
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -265,6 +270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9573254c8d5eb7646a1378dd9b194bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  radius: 0.5
 --- !u!58 &630413237703549490
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -11,8 +11,11 @@ public class TurretSpace : MonoBehaviour
 
     public Vector2 spriteBounds = new Vector2();
 
+    private int originalSortingOrder = 0;
+
     void Start()
     {
+        originalSortingOrder = this.GetComponent<SpriteRenderer>().sortingOrder;
         this.spriteBounds.x = this.transform.GetComponent<SpriteRenderer>().bounds.size.x;
         this.spriteBounds.y = this.transform.GetComponent<SpriteRenderer>().bounds.size.y;
     }
@@ -101,10 +104,12 @@ public class TurretSpace : MonoBehaviour
     {
         if(isInstalled) return;
         this.putOnEffect.SetActive(true);
+        this.GetComponent<SpriteRenderer>().sortingOrder = originalSortingOrder + 1;
     }
 
     public void UnhighlightSpace()
     {
+        this.GetComponent<SpriteRenderer>().sortingOrder = originalSortingOrder;
         this.putOnEffect.SetActive(false);
     }
 }

@@ -18,9 +18,10 @@ public class TurretUI : MonoBehaviour
 
     public void Upgrade()
     {
-        turret.UpgradeTurret();
+            turret.UpgradeTurret(); // 나중에 아래로 내리기
         if(StaticValues.GetInstance().gold >= turret.upgradePrice)
         {
+
             StaticValues.GetInstance().gold -= turret.upgradePrice;
             turret.turretSpace.ShowGetGold(turret.upgradePrice,false);
             turret.sellPrice += turret.upgradePrice/2;

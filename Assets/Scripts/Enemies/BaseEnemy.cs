@@ -27,6 +27,7 @@ public abstract class BaseEnemy : MonoBehaviour
     private bool isDie = false;
 
     public bool isSlowed = false;
+    public bool isOnSlowField = false;
 
     public float hp;
     public int gold;
@@ -156,6 +157,10 @@ public abstract class BaseEnemy : MonoBehaviour
         if(!isSlowed)
         {
             this.speed -= slowPower;
+            if(speed < 0)
+            {
+                speed = 0.1f;
+            }
             isSlowed = true;
             StartCoroutine(WaitThreeSecondsToReturnToOrignalSpeed());
         }
@@ -171,6 +176,25 @@ public abstract class BaseEnemy : MonoBehaviour
     {
         yield return new WaitForSeconds(3);
         ReturnToOriginalSpeed();
+    }
+
+    public void OnSlowField(float slowPower)
+    {
+        if(!isOnSlowField)
+        {
+            this.speed -= slowPower;
+            if(speed < 0)
+            {
+                speed = 0.1f;
+            }
+            isOnSlowField = true;
+        }
+    }
+
+    public void OutSlowField()
+    {
+        this.speed = this.originalSpeed;
+        isOnSlowField = false;
     }
 
     public IEnumerator PlayDieAnimation(GameObject getGoldText)
