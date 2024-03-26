@@ -29,11 +29,13 @@ public class StaticValues
 
     public int gold = 100;
 
-    public BaseTurret? draggedTurret = null;
+    public BaseTurret currentSelectedTurret;
 
-    public TurretUI? openTurretUI = null;
+    public TurretUI openedTurretUI;
 
-    public bool isShowingUI = false;
+    public BaseTurret draggedTurret = null;
+
+    //public bool isShowingUI = false;
 
     public Level[] levels = new Level[3]
     {

@@ -120,6 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9573254c8d5eb7646a1378dd9b194bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  radius: 0
 --- !u!58 &4142997352193831522
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -414,7 +415,8 @@ MonoBehaviour:
   attackRange: {fileID: 277051654090556874}
   canvasUI: {fileID: 0}
   mainCamera: {fileID: 0}
-  turretUI: {fileID: 5521742912535323514, guid: 4b57276f384950548839394cb4f0c5cb, type: 3}
+  turretUI_Prefab: {fileID: 5521742912535323514, guid: 4b57276f384950548839394cb4f0c5cb, type: 3}
+  openedTurretUI: {fileID: 0}
   isShowingUI: 0
   attackPower: 0
   attackSpeed: 0
@@ -426,6 +428,11 @@ MonoBehaviour:
   isHighlightingAnyTurretSpace: 0
   isInstalledTurret: 0
   isSelected: 0
+  attackPowerDelta: 0
+  attackSpeedDelta: 0
+  upgradeLevel: 0
+  upgradeCount: 0
+  upgradePrefabs: []
   leftBody: {fileID: 1677577705948069804}
   rightBody: {fileID: 1677577707296868010}
 --- !u!61 &6144529192982241

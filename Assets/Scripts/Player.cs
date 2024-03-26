@@ -22,6 +22,13 @@ using UnityEngine.UI;
 // 1. turret 하나 더 만들기 (자유롭게)
 // 2. turret 공간 설치 더 하기
 
+// 2024.03.26까지 숙제
+// 1. 다른 turret을 클릭하면 두번 클릭할 필요 없이! 바로 그 UI가 열리게 하기
+// 2. turret을 누르면 해당 turret의 사거리가 보이게 하기
+// Hint. (선생님 의견) StaticValues로 현재 선택되고 있는 turret을 추적하기
+// 하지만, 다민씨가 보기에 더 적합한 방법이 있으면 그것으로 해도 된다
+
+
 public class Player : MonoBehaviour
 {
     public GameObject centerPoint;
@@ -61,7 +68,7 @@ public class Player : MonoBehaviour
     {
         currentHpText.text = "HP : " + StaticValues.GetInstance().hp.ToString();
         currentGoldText.text = "Gold : " + StaticValues.GetInstance().gold.ToString();
-        timerText.text = "Next wave : " + (30 - this.restTimer).ToString() + "s";
+        timerText.text = "Next wave : " + (Mathf.RoundToInt(30 - this.restTimer)).ToString() + "s";
 
         // if StaticValues.GetInstance().draggedTurret != null){
         //     Debug.Log StaticValues.GetInstance().draggedTurret.name);
@@ -152,14 +159,19 @@ public class Player : MonoBehaviour
             Vector2 rayPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D[] hit = Physics2D.RaycastAll(rayPos, Vector2.zero);
             foreach(var h in hit)
-            {
-                if(h.collider.GetComponent<BaseTurret>() && !StaticValues.GetInstance().isShowingUI)
+            { 
+                var clickedTurret = h.collider.GetComponent<BaseTurret>();
+                if(clickedTurret)
                 {
-                    Debug.Log("Base Turret Clicked");
-                    h.collider.GetComponent<BaseTurret>().InstantiateUI();
-                    h.collider.GetComponent<BaseTurret>().isShowingUI = true;
+                    if(StaticValues.GetInstance().openedTurretUI != null)
+                    {
+                        StaticValues.GetInstance().openedTurretUI.DestroyUI();
+                    }
+                    clickedTurret.InstantiateUI();
+                    clickedTurret.isShowingUI = true;
+                    StaticValues.GetInstance().openedTurretUI = clickedTurret.openedTurretUI.GetComponent<TurretUI>();
                     isTurretClicked = true;
-                    StaticValues.GetInstance().isShowingUI = true;
+
                 } 
             }
             // ⬆ 여기는 UI element가 아닌 2D GameObject가 클릭되었는지 확인하는 부분
@@ -170,7 +182,7 @@ public class Player : MonoBehaviour
                 foreach(var ui in uiElements)
                 {
                     ui.DestroyUI();
-                    StaticValues.GetInstance().isShowingUI = false;
+                    StaticValues.GetInstance().openedTurretUI = null;
                 }
 
             }

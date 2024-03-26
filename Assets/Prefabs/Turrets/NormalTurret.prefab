@@ -106,7 +106,8 @@ MonoBehaviour:
   attackRange: {fileID: 3609923556699477402}
   canvasUI: {fileID: 0}
   mainCamera: {fileID: 0}
-  turretUI: {fileID: 5521742912535323514, guid: 4b57276f384950548839394cb4f0c5cb, type: 3}
+  turretUI_Prefab: {fileID: 5521742912535323514, guid: 4b57276f384950548839394cb4f0c5cb, type: 3}
+  openedTurretUI: {fileID: 0}
   isShowingUI: 0
   attackPower: 0
   attackSpeed: 0

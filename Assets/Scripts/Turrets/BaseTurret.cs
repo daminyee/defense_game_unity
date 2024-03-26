@@ -61,8 +61,8 @@ public abstract class BaseTurret : MonoBehaviour
     public Canvas canvasUI;
     public Camera mainCamera;
 
-    public GameObject turretUI;
-    private GameObject savedTurretUI;
+    public GameObject turretUI_Prefab;
+    public GameObject openedTurretUI {get; private set;}
     public bool isShowingUI = false;
 
 
@@ -358,6 +358,8 @@ public abstract class BaseTurret : MonoBehaviour
     {
         if(isShowingUI) return;
 
+        MakeAttackRangeVisible();
+
         var centerPos = StaticValues.GetInstance().centerPos;
         Vector3 worldPoint = this.transform.position;
 
@@ -404,9 +406,9 @@ public abstract class BaseTurret : MonoBehaviour
         }
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(worldPoint);
 
-        var instantiatedTurretUI = Instantiate(turretUI, screenPoint, Quaternion.identity);
-        this.savedTurretUI = instantiatedTurretUI;
-        StaticValues.GetInstance().openTurretUI = instantiatedTurretUI.GetComponent<TurretUI>();
+        var instantiatedTurretUI = Instantiate(turretUI_Prefab, screenPoint, Quaternion.identity);
+        this.openedTurretUI = instantiatedTurretUI;
+        StaticValues.GetInstance().openedTurretUI = instantiatedTurretUI.GetComponent<TurretUI>();
         instantiatedTurretUI.transform.SetParent(canvasUI.transform, false);
 
         var turretUI_Class = instantiatedTurretUI.GetComponent<TurretUI>();
@@ -448,7 +450,7 @@ public abstract class BaseTurret : MonoBehaviour
     public void SellTurret()
     {
         StaticValues.GetInstance().gold += this.sellPrice;
-        StaticValues.GetInstance().isShowingUI = false;
+        //StaticValues.GetInstance().isShowingUI = false;
         this.turretSpace.ShowGetGold(this.upgradePrice,true);
         turretSpace.installedTurret = null;
         Destroy(this.gameObject);
