@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -36,6 +37,9 @@ public class Player : MonoBehaviour
     public Camera mainCamera;
     public Canvas UI_Parent;
 
+    public GameObject stageClearUI;
+    public GameObject gameOverUI;
+
     public Text currentHpText;
     public Text currentGoldText;
     public Text timerText;
@@ -43,6 +47,9 @@ public class Player : MonoBehaviour
     public GameObject normalEnemyPrefab;
     public GameObject fastEnemyPrefab;
     public GameObject tankingEnemyPrefab;
+    public GameObject MiniBossEnemyPrefab;
+    public GameObject multipleEnemyPrefab;
+    public GameObject shieldEnemyPrefab;
 
     public WayPoint[] path;
 
@@ -59,7 +66,7 @@ public class Player : MonoBehaviour
     
     void Start()
     {
-        currentLevelStatus = new Level(0,0,0);
+        currentLevelStatus = new Level(0,0,0,0,0,0);
         StaticValues.GetInstance().centerPos = centerPoint.transform.position;
     }
 
@@ -93,15 +100,30 @@ public class Player : MonoBehaviour
                     SpawnEnemy(fastEnemyPrefab);
                     currentLevelStatus.maxFastEnemy++;
                 }
-                if(currentLevelStatus.maxFastEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxNormalEnemy)
+                if(currentLevelStatus.maxNormalEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxNormalEnemy)
                 {
                     SpawnEnemy(normalEnemyPrefab);
                     currentLevelStatus.maxNormalEnemy++;
                 }
-                if(currentLevelStatus.maxFastEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxTankingEnemy)
+                if(currentLevelStatus.maxTankingEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxTankingEnemy)
                 {
                     SpawnEnemy(tankingEnemyPrefab);
                     currentLevelStatus.maxTankingEnemy++;
+                }
+                if(currentLevelStatus.maxMiniBossEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxMiniBossEnemy)
+                {
+                    SpawnEnemy(MiniBossEnemyPrefab);
+                    currentLevelStatus.maxMiniBossEnemy++;
+                }
+                if(currentLevelStatus.maxMultipleEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxMultipleEnemy)
+                {
+                    SpawnEnemy(multipleEnemyPrefab);
+                    currentLevelStatus.maxMultipleEnemy++;
+                }
+                if(currentLevelStatus.maxShieldEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxShieldEnemy)
+                {
+                    SpawnEnemy(shieldEnemyPrefab);
+                    currentLevelStatus.maxMultipleEnemy++;
                 }
                 enemySpawnTimer = 0.0f;
 
@@ -198,18 +220,39 @@ public class Player : MonoBehaviour
         var startingZ = this.path[0].transform.position.z;
         var startPoint = new Vector3(startingX, startingY, startingZ);
         var newEnemy = Instantiate(enemy, startPoint, Quaternion.identity);
-        newEnemy.GetComponent<BaseEnemy>().Initialize(path, mainCamera, UI_Parent);
+        newEnemy.GetComponent<BaseEnemy>().Initialize(path, mainCamera, UI_Parent, 0, path[0].transform.position);
     }
 
     public void GotHit()
     {
-     StaticValues.GetInstance().hp -= 1;
+        StaticValues.GetInstance().hp -= 1;
+        if(StaticValues.GetInstance().hp <= 0)
+        {
+            GameOver();
+        }
     }
     
     public void LoadNewLevel()
     {
         this.currentLevelIndex++;
-        this.currentLevelStatus = new Level(0,0,0);
+
+        if(currentLevelIndex == StaticValues.GetInstance().levels.Length)
+        {
+            StageClear();
+        }
+
+        this.currentLevelStatus = new Level(0,0,0,0,0,0);
         isRestTime = true;
+    }
+
+    void StageClear()
+    {
+        stageClearUI.SetActive(true);
+    }
+
+    void GameOver()
+    {
+        gameOverUI.SetActive(true);
+        StaticValues.GetInstance().isPaused = true;
     }
 }

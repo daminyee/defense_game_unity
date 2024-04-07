@@ -56,7 +56,12 @@ public class Bullet : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collider)
     {
         var enemy = collider.GetComponent<BaseEnemy>();
+        //var shield = collider.GetComponent<Shield>();
 
+        // if(shield != null)
+        // {
+        //     Destroy(this.gameObject);
+        // }
         if(enemy != null)
         {
             enemy.GotHit(attackDamage);

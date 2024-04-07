@@ -24,7 +24,7 @@ public abstract class BaseEnemy : MonoBehaviour
 
     public int currentWayPointIndex = 0;
     private bool isMoving = false;
-    private bool isDie = false;
+    public bool isDie = false;
 
     public bool isSlowed = false;
     public bool isOnSlowField = false;
@@ -35,7 +35,7 @@ public abstract class BaseEnemy : MonoBehaviour
     public float originalSpeed = 1.0f;
     public float speed;
 
-    public void Initialize(WayPoint[] path, Camera mainCamera, Canvas canvasUI)
+    public void Initialize(WayPoint[] path, Camera mainCamera, Canvas canvasUI, int currentWayPointIndex, Vector2 spawnPosition)
     {
         originalSpeed = speed;
 
@@ -43,12 +43,15 @@ public abstract class BaseEnemy : MonoBehaviour
         this.mainCamera = mainCamera;
         this.canvasUI = canvasUI;
 
-        this.currentWayPointIndex = 0;
-        this.transform.position = this.path[this.currentWayPointIndex].transform.position;
+        this.currentWayPointIndex = currentWayPointIndex;
+        this.transform.position = spawnPosition;
     }
 
     public void MoveToNextWayPoint()
     {
+        if(StaticValues.GetInstance().isPaused){
+            return;
+        }
         if (this.currentWayPointIndex < this.path.Length)
         {
 

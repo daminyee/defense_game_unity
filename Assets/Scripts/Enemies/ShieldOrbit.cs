@@ -2,18 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FastEnemy : BaseEnemy
+public class ShieldOrbit : MonoBehaviour
 {
+    public GameObject parentEnemy;
     // Start is called before the first frame update
+
+    public float speed;
+
     void Start()
-    {
+    {   
+        this.speed = 150f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        this.MoveToNextWayPoint();
-
-        
+        transform.Rotate(0, 0, speed * Time.deltaTime);
     }
 }

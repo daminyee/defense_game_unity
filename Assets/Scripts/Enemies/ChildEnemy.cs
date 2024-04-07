@@ -2,18 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FastEnemy : BaseEnemy
+public class ChildEnemy : BaseEnemy
 {
     // Start is called before the first frame update
     void Start()
     {
+        transform.Translate(0.3f, 0, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
         this.MoveToNextWayPoint();
-
-        
     }
 }

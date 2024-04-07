@@ -107,8 +107,8 @@ public abstract class BaseTurret : MonoBehaviour
             GameObject newTurretGameObject = Instantiate(upgradePrefabs[upgradeCount], this.transform.position, Quaternion.identity);
             BaseTurret upgradeTurret= newTurretGameObject.GetComponent<BaseTurret>();
             CopyDataToNewTurret(upgradeTurret);
+            attackRange = upgradeTurret.attackRange;
             upgradeTurret.MakeAttackRangeInvisible();
-
             Destroy(this.gameObject);
         }
     }
@@ -142,6 +142,7 @@ public abstract class BaseTurret : MonoBehaviour
         newTurret.upgradeCount = this.upgradeCount + 1;
         newTurret.turretSpaceDistances = this.turretSpaceDistances;
         newTurret.enemiesToAttack = this.enemiesToAttack;
+        StaticValues.GetInstance().currentSelectedTurret = newTurret;
     }
 
     void UpdateDistance(TurretSpace turretSpaceObject, float distance)
@@ -266,6 +267,8 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void AttackEnemy()
     {
+        if(StaticValues.GetInstance().isPaused) return;
+
         var range = this.attackRange.GetComponent<CircleCollider2D>().bounds.size;
         
         // get the turret direction
@@ -291,7 +294,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     protected void WatchEnemy()
     {
-        if(this.targetEnemy == null)
+        if(this.targetEnemy == null || StaticValues.GetInstance().isPaused)
         {
             return;
         }
@@ -445,8 +448,6 @@ public abstract class BaseTurret : MonoBehaviour
         //isShowingUI = true;
     }
 
-    
-
     public void SellTurret()
     {
         StaticValues.GetInstance().gold += this.sellPrice;
@@ -456,6 +457,10 @@ public abstract class BaseTurret : MonoBehaviour
         Destroy(this.gameObject);
     }
 
+    // public void ChangeSpeed(float gameSpeed)
+    // {
+            
+    // }
     // void OnMouseDown() // collider가 있으면 클릭가능
     // {
     //     if(this.isInstalledTurret){
