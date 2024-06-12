@@ -10,23 +10,24 @@ public class MultipleEnemy : BaseEnemy
 {
     public GameObject childEnemyPrefab;
     public int spawnEnemyCount;
+    private bool isSeparated = false;
 
     Quaternion spawnRotation;
     void Start()
     {
-        
+        SetMap();
     }
 
     void Update()
     {
         this.MoveToNextWayPoint();
-        if(this.isDie)
+        if (this.isDie && !isSeparated)
         {
             // for (int i = 0; i <= spawnEnemyCount; i++)
             // {
             //     var thisEnemyRotation = this.transform.rotation;
             //     spawnRotation = Quaternion.Euler(0, 0, thisEnemyRotation.eulerAngles.z + (360 / spawnEnemyCount));
-                
+
             //     var newEnemy = Instantiate(childEnemyPrefab, this.transform.position, spawnRotation);
             //     // position을 조금 다르게 줘야지 서로 겹치지 않는다!
             //     newEnemy.GetComponent<BaseEnemy>().Initialize(this.path, this.mainCamera, this.canvasUI, this.currentWayPointIndex, this.transform.position);
@@ -36,13 +37,18 @@ public class MultipleEnemy : BaseEnemy
             {
                 var thisEnemyRotation = this.transform.rotation;
                 spawnRotation = Quaternion.Euler(0, 0, thisEnemyRotation.eulerAngles.z + i);
-                
+
                 var newEnemy = Instantiate(childEnemyPrefab, this.transform.position, spawnRotation);
                 // position을 조금 다르게 줘야지 서로 겹치지 않는다!
-                newEnemy.GetComponent<BaseEnemy>().Initialize(this.path, this.mainCamera, this.canvasUI, this.currentWayPointIndex, this.transform.position);
+                var mainCamera = Camera.main;
+                newEnemy.GetComponent<BaseEnemy>().Initialize(path, this.mainCamera, this.canvasUI, this.currentWayPointIndex, this.transform.position);
+                newEnemy.GetComponent<BaseEnemy>().moveDistance = this.moveDistance;
                 newEnemy.transform.Translate(0.4f, 0, 0);
+
+                //StaticValues.GetInstance().livingEnemyCount += 1;
             }
-            Destroy(this.gameObject);
+            isSeparated = true;
+            //Destroy(this.gameObject);
         }
     }
 }

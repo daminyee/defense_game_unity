@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 1885881819736794379}
   m_Layer: 0
   m_Name: ShieldEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -155,6 +155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path: []
+  moveDistance: 0
   head: {fileID: 5778530380123355941}
   body: {fileID: 5778530380119506294}
   canvasUI: {fileID: 0}

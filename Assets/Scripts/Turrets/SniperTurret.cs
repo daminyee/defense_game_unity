@@ -12,26 +12,28 @@ public class SniperTurret : BaseTurret
 
     void Update()
     {
-        if(!this.isInstalledTurret) return;
-        
+        if (!this.isInstalledTurret) return;
+
         WatchEnemy();
-        if(targetEnemy != null)
+        if (targetEnemy != null)
         {
-            if(attackCoolCount > 2)
+            if (attackCoolCount > 2)
             {
                 AttackEnemy();
                 attackCoolCount = 0;
             }
         }
         attackCoolCount += Time.deltaTime * attackSpeed;
-        
+
+        DebugRay();
+        DebugTarget();
     }
 
     public override void Attack()
     {
         var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
         var bullet = newBullet.GetComponent<SniperBullet>();
-        bullet.Initialize(this.attackPower,this.transform.position);
+        bullet.Initialize(this.attackPower, this.transform.position);
     }
 
     // public void UpgradeTurret()

@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: -2694873771721931201}
   m_Layer: 0
   m_Name: NormalEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -84,10 +84,18 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  moveDistance: 0
   head: {fileID: 5778530380123355941}
   body: {fileID: 5778530380119506294}
+  canvasUI: {fileID: 0}
+  mainCamera: {fileID: 0}
   currentWayPointIndex: 0
+  isDie: 0
+  isSlowed: 0
+  isOnSlowField: 0
   hp: 0
+  gold: 0
+  originalSpeed: 1
   speed: 1
 --- !u!61 &-2694873771721931201
 BoxCollider2D:

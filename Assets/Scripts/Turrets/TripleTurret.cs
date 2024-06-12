@@ -14,12 +14,12 @@ public class TripleTurret : BaseTurret
 
     void Update()
     {
-        if(!this.isInstalledTurret) return;
-        
+        if (!this.isInstalledTurret) return;
+
         WatchEnemy();
-        if(targetEnemy != null)
+        if (targetEnemy != null)
         {
-            if(attackCoolCount > 2)
+            if (attackCoolCount > 2)
             {
                 AttackEnemy();
                 attackCoolCount = 0;
@@ -27,22 +27,23 @@ public class TripleTurret : BaseTurret
         }
         attackCoolCount += Time.deltaTime * attackSpeed;
 
-       
+        DebugRay();
+        DebugTarget();
     }
 
     public override void Attack()
     {
         var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
         var bullet = newBullet.GetComponent<Bullet>();
-        bullet.Initialize(this.attackPower,this.transform.position, 0, false);
+        bullet.Initialize(this.attackPower, this.transform.position, 0, false);
 
         var newLeftBullet = Instantiate(bulletPrefab, this.leftBody.transform.position, this.transform.rotation);
         var leftBullet = newLeftBullet.GetComponent<Bullet>();
-        leftBullet.Initialize(this.attackPower / 3,this.transform.position, 0, false);
+        leftBullet.Initialize(this.attackPower / 3, this.transform.position, 0, false);
 
         var newRightBullet = Instantiate(bulletPrefab, this.rightBody.transform.position, this.transform.rotation);
         var rightbullet = newRightBullet.GetComponent<Bullet>();
-        bullet.Initialize(this.attackPower / 3,this.transform.position, 0, false);
+        bullet.Initialize(this.attackPower / 3, this.transform.position, 0, false);
     }
 
     // public override void UpgradeTurret()

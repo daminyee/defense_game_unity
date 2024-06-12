@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -30,11 +31,20 @@ using UnityEngine.UI;
 // 하지만, 다민씨가 보기에 더 적합한 방법이 있으면 그것으로 해도 된다
 
 
+// 2024.04.17
+// 1. stage clear 진짜 적을 다 죽였을 때만 나오게 하기
+// 2. 업그레이드 UI가 떠있는데, 새로운 turret으로 변경될때, UI가 떠있는상태가 되게끔 하기 (마치 유지되는 것처럼)
+// 3. 아이템 추가 (돈으로 HP 살 수 있게, 폭탄(전체 삭제)) - UI까지 (돈으로 HP 사는 건 꼭 하기)
+
+
+// 2024.04.23
+// 1. stage clear 진짜 적을 다 죽였을 때만 나오게 하기
+// 2. 아이템 추가 (폭탄 추가하기)
+
 public class Player : MonoBehaviour
 {
     public GameObject centerPoint;
 
-    public Camera mainCamera;
     public Canvas UI_Parent;
 
     public GameObject stageClearUI;
@@ -43,15 +53,6 @@ public class Player : MonoBehaviour
     public Text currentHpText;
     public Text currentGoldText;
     public Text timerText;
-
-    public GameObject normalEnemyPrefab;
-    public GameObject fastEnemyPrefab;
-    public GameObject tankingEnemyPrefab;
-    public GameObject MiniBossEnemyPrefab;
-    public GameObject multipleEnemyPrefab;
-    public GameObject shieldEnemyPrefab;
-
-    public WayPoint[] path;
 
     public Level currentLevelStatus;
 
@@ -63,10 +64,11 @@ public class Player : MonoBehaviour
 
     private bool isRestTime = false;
     private bool isShowingUI = false;
-    
+    public bool isLastLevel = false;
+
     void Start()
     {
-        currentLevelStatus = new Level(0,0,0,0,0,0);
+        currentLevelStatus = new Level(0, 0, 0, 0, 0, 0);
         StaticValues.GetInstance().centerPos = centerPoint.transform.position;
     }
 
@@ -80,64 +82,47 @@ public class Player : MonoBehaviour
         // if StaticValues.GetInstance().draggedTurret != null){
         //     Debug.Log StaticValues.GetInstance().draggedTurret.name);
         // }
-        
+
         timer += Time.deltaTime;
         if (timer > 1.0f)
         {
-         StaticValues.GetInstance().gold = StaticValues.GetInstance().gold + 1;
+            StaticValues.GetInstance().gold = StaticValues.GetInstance().gold + 1;
             timer = 0.0f;
             // SpawnEnemy(normalEnemyPrefab.GetComponent<BaseEnemy>());
         }
 
-        if(!isRestTime)
+        if (!isRestTime)
         {
             timerText.color = new Color(255, 255, 255, 0);
             enemySpawnTimer += Time.deltaTime;
-            if(enemySpawnTimer > 5.0f)
+            if (this.currentLevelIndex >= StaticValues.GetInstance().levels.Length)
             {
-                if(currentLevelStatus.maxFastEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxFastEnemy)
+                return;
+            }
+            if (enemySpawnTimer > 1.0f)
+            {
+                foreach (EnemyType enemyType in Enum.GetValues(typeof(EnemyType)))
                 {
-                    SpawnEnemy(fastEnemyPrefab);
-                    currentLevelStatus.maxFastEnemy++;
-                }
-                if(currentLevelStatus.maxNormalEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxNormalEnemy)
-                {
-                    SpawnEnemy(normalEnemyPrefab);
-                    currentLevelStatus.maxNormalEnemy++;
-                }
-                if(currentLevelStatus.maxTankingEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxTankingEnemy)
-                {
-                    SpawnEnemy(tankingEnemyPrefab);
-                    currentLevelStatus.maxTankingEnemy++;
-                }
-                if(currentLevelStatus.maxMiniBossEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxMiniBossEnemy)
-                {
-                    SpawnEnemy(MiniBossEnemyPrefab);
-                    currentLevelStatus.maxMiniBossEnemy++;
-                }
-                if(currentLevelStatus.maxMultipleEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxMultipleEnemy)
-                {
-                    SpawnEnemy(multipleEnemyPrefab);
-                    currentLevelStatus.maxMultipleEnemy++;
-                }
-                if(currentLevelStatus.maxShieldEnemy < StaticValues.GetInstance().levels[this.currentLevelIndex].maxShieldEnemy)
-                {
-                    SpawnEnemy(shieldEnemyPrefab);
-                    currentLevelStatus.maxMultipleEnemy++;
+                    if (currentLevelStatus.maxEnemyCountDict[enemyType] < StaticValues.GetInstance().levels[this.currentLevelIndex].maxEnemyCountDict[enemyType])
+                    {
+                        SpawnEnemy(enemyType);
+                        currentLevelStatus.maxEnemyCountDict[enemyType]++;
+                    }
                 }
                 enemySpawnTimer = 0.0f;
 
-                if(currentLevelStatus.IsEqual(StaticValues.GetInstance().levels[this.currentLevelIndex]))
+                if (currentLevelStatus.IsEqual(StaticValues.GetInstance().levels[this.currentLevelIndex]))
                 {
                     LoadNewLevel();
                 }
             }
-        }else 
+        }
+        else
         {
             restTimer += Time.deltaTime;
             timerText.color = new Color(255, 255, 255, 255);
 
-            if(restTimer >= 30)
+            if (restTimer >= 30)
             {
                 isRestTime = false;
             }
@@ -152,7 +137,7 @@ public class Player : MonoBehaviour
         // 1. get elapsed time
         // 2. if elapsed time > 1 second
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
 
             // ⬇ 여기는 UI element가 클릭되었는지 확인하는 부분
@@ -160,12 +145,12 @@ public class Player : MonoBehaviour
             pointer.position = Input.mousePosition;
             List<RaycastResult> raycastResults = new List<RaycastResult>();
             // 1) raycast all은 모든 "UI"에 대해서 raycast를 수행한다.
-            EventSystem.current.RaycastAll(pointer, raycastResults); 
+            EventSystem.current.RaycastAll(pointer, raycastResults);
             TurretUI validTurretUI = null;
             bool isUIClicked = false;
-            foreach(var result in raycastResults)
+            foreach (var result in raycastResults)
             {
-                if(result.gameObject.GetComponent<TurretUI>())
+                if (result.gameObject.GetComponent<TurretUI>())
                 {
                     validTurretUI = result.gameObject.GetComponent<TurretUI>();
                     isUIClicked = true;
@@ -180,12 +165,12 @@ public class Player : MonoBehaviour
             bool isTurretClicked = false;
             Vector2 rayPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D[] hit = Physics2D.RaycastAll(rayPos, Vector2.zero);
-            foreach(var h in hit)
-            { 
+            foreach (var h in hit)
+            {
                 var clickedTurret = h.collider.GetComponent<BaseTurret>();
-                if(clickedTurret)
+                if (clickedTurret)
                 {
-                    if(StaticValues.GetInstance().openedTurretUI != null)
+                    if (StaticValues.GetInstance().openedTurretUI != null)
                     {
                         StaticValues.GetInstance().openedTurretUI.DestroyUI();
                     }
@@ -194,14 +179,15 @@ public class Player : MonoBehaviour
                     StaticValues.GetInstance().openedTurretUI = clickedTurret.openedTurretUI.GetComponent<TurretUI>();
                     isTurretClicked = true;
 
-                } 
+                }
             }
             // ⬆ 여기는 UI element가 아닌 2D GameObject가 클릭되었는지 확인하는 부분
 
-            if(!isUIClicked && !isTurretClicked){
+            if (!isUIClicked && !isTurretClicked)
+            {
                 // 열려있는 UI를 모두 닫는다.
                 var uiElements = this.UI_Parent.GetComponentsInChildren<TurretUI>();
-                foreach(var ui in uiElements)
+                foreach (var ui in uiElements)
                 {
                     ui.DestroyUI();
                     StaticValues.GetInstance().openedTurretUI = null;
@@ -211,43 +197,41 @@ public class Player : MonoBehaviour
         }
     }
 
-    void SpawnEnemy(GameObject enemy)
+    void SpawnEnemy(EnemyType enemy)
     {
-        // 1. get random position
-        // 2. spawn enemy at random position
-        var startingX = this.path[0].transform.position.x;
-        var startingY = this.path[0].transform.position.y;
-        var startingZ = this.path[0].transform.position.z;
-        var startPoint = new Vector3(startingX, startingY, startingZ);
-        var newEnemy = Instantiate(enemy, startPoint, Quaternion.identity);
-        newEnemy.GetComponent<BaseEnemy>().Initialize(path, mainCamera, UI_Parent, 0, path[0].transform.position);
+        gameObject.GetComponent<BaseSpawn>().Spawn(enemy);
     }
 
     public void GotHit()
     {
         StaticValues.GetInstance().hp -= 1;
-        if(StaticValues.GetInstance().hp <= 0)
+        if (StaticValues.GetInstance().hp <= 0)
         {
             GameOver();
         }
     }
-    
+
     public void LoadNewLevel()
     {
+        if (isLastLevel) return;
         this.currentLevelIndex++;
-
-        if(currentLevelIndex == StaticValues.GetInstance().levels.Length)
+        this.currentLevelStatus = new Level(0, 0, 0, 0, 0, 0);
+        if (currentLevelIndex == StaticValues.GetInstance().levels.Length)
         {
-            StageClear();
+            isLastLevel = true;
+            Debug.Log(isLastLevel);
+            // if (StaticValues.GetInstance().livingEnemyCount == 0)
+            // {
+            //     StageClear();
+            // }
         }
-
-        this.currentLevelStatus = new Level(0,0,0,0,0,0);
         isRestTime = true;
     }
 
-    void StageClear()
+    public void StageClear()
     {
         stageClearUI.SetActive(true);
+        StaticValues.GetInstance().isPaused = true;
     }
 
     void GameOver()

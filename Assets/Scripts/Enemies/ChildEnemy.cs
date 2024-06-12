@@ -8,6 +8,9 @@ public class ChildEnemy : BaseEnemy
     void Start()
     {
         transform.Translate(0.3f, 0, 0);
+        SetMap();
+        this.MoveToNextWayPoint();
+        FindWayPoint();
     }
 
     // Update is called once per frame

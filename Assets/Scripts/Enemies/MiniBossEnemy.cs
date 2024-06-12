@@ -11,14 +11,14 @@ public class MiniBossEnemy : BaseEnemy
     // Start is called before the first frame update
     void Start()
     {
-        
+        SetMap();
     }
 
     // Update is called once per frame
     void Update()
     {
-        this.MoveToNextWayPoint(); 
-        if(dashCoolDown >= dashCoolTime)
+        this.MoveToNextWayPoint();
+        if (dashCoolDown >= dashCoolTime)
         {
             Dash();
         }

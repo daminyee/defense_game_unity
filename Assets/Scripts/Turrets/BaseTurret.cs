@@ -52,6 +52,21 @@ using UnityEngine.UI;
 // 2. 판매로직 구현하기 (판매하면, 업그레이드 비용 포함해서 돈을 늘려야 돼)
 // 3. 터렛 업그레이드하면 저 새로 만든 3개 쏘는 걸로 바뀌게끔 해보기 
 
+// 화요일까지 (4월 9일)
+// 테마: 다음 수업 때 터렛이 오작동하고 있는 이유를 분석할 것인데,
+// 밑단 작업
+// 1. Turret이 바라바고 있는 지점을 Debug.Ray 하기 (터렛이 바라보는 방향을 알아야 함)
+// 2. 각 터렛마다 isDebugMode를 넣기 (public)
+//      (설명: isDebugMode 개별 터렛 분석용 변수.)
+// 3. 터렛이 isDebugMode가 켜져있다면 Update문에 바라보고 있는 적들을 Debug.Log 나열하게 하세요 (Update)
+//    Dictionary 정보를 가져오게 해라
+// 4. 이외, 터렛이 오작동하는 이유를 분석할 수 있는 요소들을 Debug Log하는 밑단 작업을 완성하기
+//    (조건문이 isDebugMode일때만 해당 내용들을 Debug.Log할 수 있게끔 작업)
+
+
+// 화요일까지 (4월 16일)
+// 숙제: 숫자가 안 없어지는 문제 혼자서 해결해보기
+//      + ) 다른 버그가 있는지 계속 테스트하긴
 public abstract class BaseTurret : MonoBehaviour
 {
     public TurretSpace turretSpace;
@@ -62,12 +77,12 @@ public abstract class BaseTurret : MonoBehaviour
     public Camera mainCamera;
 
     public GameObject turretUI_Prefab;
-    public GameObject openedTurretUI {get; private set;}
+    public GameObject openedTurretUI { get; private set; }
     public bool isShowingUI = false;
 
 
-    public BaseEnemy targetEnemy { get; private set;}
-    public Queue<BaseEnemy> enemiesToAttack = new Queue<BaseEnemy>();
+    public BaseEnemy targetEnemy { get; private set; }
+    public Dictionary<BaseEnemy, float> enemiesToAttack = new Dictionary<BaseEnemy, float>();
 
     public float attackPower;
     public float attackSpeed;
@@ -76,7 +91,9 @@ public abstract class BaseTurret : MonoBehaviour
     public int price;
     public int upgradePrice;
     public int sellPrice;
-    
+
+    public bool isDebugMode;
+
     public bool isInValidSpace = false;
     public bool isHighlightingAnyTurretSpace = false;
 
@@ -92,6 +109,7 @@ public abstract class BaseTurret : MonoBehaviour
     public float attackSpeedDelta;
     public int upgradeLevel;
     public int upgradeCount = 0;
+    //public bool isMaxUpgrade;
 
     public List<GameObject> upgradePrefabs; // 어떤 터렛은 여러번 prefab가 변경 가능하기 떄문
 
@@ -102,30 +120,33 @@ public abstract class BaseTurret : MonoBehaviour
         this.attackSpeed += attackSpeedDelta;
         upgradeLevel += 1;
 
-        if(upgradeLevel >= 3 && upgradePrefabs[upgradeCount] != null)
+        if (upgradeLevel >= 3 && upgradeCount < upgradePrefabs.Count && upgradePrefabs[upgradeCount] != null)
         {
             GameObject newTurretGameObject = Instantiate(upgradePrefabs[upgradeCount], this.transform.position, Quaternion.identity);
-            BaseTurret upgradeTurret= newTurretGameObject.GetComponent<BaseTurret>();
+            BaseTurret upgradeTurret = newTurretGameObject.GetComponent<BaseTurret>();
             CopyDataToNewTurret(upgradeTurret);
             attackRange = upgradeTurret.attackRange;
             upgradeTurret.MakeAttackRangeInvisible();
+
+            StaticValues.GetInstance().openedTurretUI.DestroyUI();
+            upgradeTurret.InstantiateUI();
             Destroy(this.gameObject);
         }
     }
     //public abstract void SellTurret();
 
 
-    public void Initialize(bool isSelected, Camera mainCamera, Canvas canvasUI) 
+    public void Initialize(bool isSelected, Camera mainCamera, Canvas canvasUI)
     // Start와 동일한 역할을 하는 함수
     {
         this.isSelected = isSelected;
         this.mainCamera = mainCamera;
         this.canvasUI = canvasUI;
 
-        this.enemiesToAttack = new Queue<BaseEnemy>();
+        this.enemiesToAttack = new Dictionary<BaseEnemy, float>();
         this.turretSpaceDistances = new Dictionary<TurretSpace, float>();
         this.isSelected = true;
-        this.sellPrice = price/2;
+        this.sellPrice = price / 2;
     }
 
 
@@ -139,6 +160,7 @@ public abstract class BaseTurret : MonoBehaviour
         newTurret.isInstalledTurret = true;
 
         newTurret.upgradePrefabs = this.upgradePrefabs;
+        newTurret.upgradeLevel = 0;
         newTurret.upgradeCount = this.upgradeCount + 1;
         newTurret.turretSpaceDistances = this.turretSpaceDistances;
         newTurret.enemiesToAttack = this.enemiesToAttack;
@@ -147,7 +169,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     void UpdateDistance(TurretSpace turretSpaceObject, float distance)
     {
-        if(turretSpaceDistances.ContainsKey(turretSpaceObject))
+        if (turretSpaceDistances.ContainsKey(turretSpaceObject))
         {
             turretSpaceDistances[turretSpaceObject] = distance;
         }
@@ -159,7 +181,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     void DeleteDistance(TurretSpace turretSpaceObject)
     {
-        if(turretSpaceDistances.ContainsKey(turretSpaceObject))
+        if (turretSpaceDistances.ContainsKey(turretSpaceObject))
         {
             turretSpaceDistances.Remove(turretSpaceObject);
         }
@@ -168,11 +190,12 @@ public abstract class BaseTurret : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D collider)
     {
-        if(this.isInstalledTurret){
+        if (this.isInstalledTurret)
+        {
             return;
         }
-         
-        if(collider.GetComponent<TurretSpace>() == null)
+
+        if (collider.GetComponent<TurretSpace>() == null)
         {
             return;
         }
@@ -185,7 +208,7 @@ public abstract class BaseTurret : MonoBehaviour
         float minTurretSpaceDistance = float.MaxValue;
         foreach (var turretSpaceDistance in turretSpaceDistances)
         {
-            if(turretSpaceDistance.Value < minTurretSpaceDistance)
+            if (turretSpaceDistance.Value < minTurretSpaceDistance)
             {
                 minTurretSpaceDistance = turretSpaceDistance.Value;
                 minDistanceTurretSpace = turretSpaceDistance.Key;
@@ -195,7 +218,7 @@ public abstract class BaseTurret : MonoBehaviour
         turretSpace = minDistanceTurretSpace;
         foreach (var turretSpaceDistance in turretSpaceDistances)
         {
-            if(turretSpaceDistance.Key == minDistanceTurretSpace && this.isSelected == true)
+            if (turretSpaceDistance.Key == minDistanceTurretSpace && this.isSelected == true)
             {
                 turretSpaceDistance.Key.HighlightSpace();
             }
@@ -206,36 +229,41 @@ public abstract class BaseTurret : MonoBehaviour
         }
         //Debug.Log(spacePos);
         this.isInValidSpace = true;
-     
+
     }
     void OnTriggerExit2D(Collider2D collider)
     {
-        if(this.isInstalledTurret){
-            return;
-        }
-        turretSpace = collider.GetComponent<TurretSpace>();
-    
-        if(turretSpace == null)
+        if (this.isInstalledTurret)
         {
             return;
         }
-        
+        turretSpace = collider.GetComponent<TurretSpace>();
+
+        if (turretSpace == null)
+        {
+            return;
+        }
+
         turretSpace.UnhighlightSpace();
         DeleteDistance(turretSpace);
-        if(this.turretSpaceDistances.Count <= 0)
+        if (this.turretSpaceDistances.Count <= 0)
         {
             this.isInValidSpace = false;
         }
     }
 
+    public bool IsTurrestInstallable()
+    {
+        return true;
+    }
+
     public void InstallTurret()
     {
+        AdditionalStaticValuesForGame2.GetInstance().SetTurretInstallStatus(turretSpace.rowIndex, turretSpace.columnIndex, true); ;
         this.transform.position = spacePos;
         StaticValues.GetInstance().gold -= this.price;
         MakeAttackRangeInvisible();
-        
-        //Debug.Log("Installed turret");
-        //Debug.Log(turretSpace);
+
         foreach (var turretSpaceDistance in turretSpaceDistances)
         {
             turretSpaceDistance.Key.UnhighlightSpace();
@@ -245,46 +273,40 @@ public abstract class BaseTurret : MonoBehaviour
         this.turretSpaceDistances = null;
 
         turretSpace.installedTurret = this;
-        turretSpace.ShowGetGold(this.price,false);
-        // if(turretSpace != null)
-        // {
-        //     turretSpace.isInstalled = true;
-        //     this.isInstalledTurret = true;
-        //     turretSpace.UnhighlightSpace();
-        //     this.isSelected = false;
-        //     DeleteDistance(turretSpace);
-        // }
+        turretSpace.isInstalled = true;
+        turretSpace.TurnOffIsTrigger();
+        turretSpace.ShowGetGold(this.price, false);
     }
 
     public void AddEnemy(BaseEnemy enemy)
     {
-        if(this.targetEnemy == null)
+        if (this.targetEnemy == null)
         {
             this.SetTargetEnemy(enemy);
         }
-        this.enemiesToAttack.Enqueue(enemy); //오류!
+        this.enemiesToAttack.Add(enemy, 0); //오류!
     }
 
     public void AttackEnemy()
     {
-        if(StaticValues.GetInstance().isPaused) return;
+        if (StaticValues.GetInstance().isPaused) return;
 
         var range = this.attackRange.GetComponent<CircleCollider2D>().bounds.size;
-        
+
         // get the turret direction
         var doAttack = false;
         // shoot debug ray
         var ray = new Ray(this.transform.position, this.transform.right);
-        var hit = Physics2D.RaycastAll(ray.origin, ray.direction, range.x/2); // 거리를 조절해야함
+        var hit = Physics2D.RaycastAll(ray.origin, ray.direction, range.x / 2); // 거리를 조절해야함
         foreach (var h in hit)
         {
-            if(h.collider.GetComponent<BaseEnemy>() != null)
+            if (h.collider.GetComponent<BaseEnemy>() != null)
             {
                 doAttack = true;
                 break;
             }
         }
-        if(!doAttack)
+        if (!doAttack)
         {
             return;
         }
@@ -294,15 +316,27 @@ public abstract class BaseTurret : MonoBehaviour
 
     protected void WatchEnemy()
     {
-        if(this.targetEnemy == null || StaticValues.GetInstance().isPaused)
+        if (this.enemiesToAttack.Count == 0 || StaticValues.GetInstance().isPaused)
         {
             return;
+        }
+        foreach (var enemyToAttack in enemiesToAttack)
+        {
+            if (targetEnemy == null)
+            {
+                this.targetEnemy = enemyToAttack.Key;
+            }
+            if (enemyToAttack.Key.moveDistance > this.targetEnemy.moveDistance)
+            {
+                this.targetEnemy = enemyToAttack.Key;
+            }
         }
         var xLength = this.targetEnemy.transform.position.x - this.transform.position.x;
         var yLength = this.targetEnemy.transform.position.y - this.transform.position.y;
         var angle = Math.Atan2(yLength, xLength);
         var toRotation = Quaternion.Euler(0, 0, (float)(angle * 180 / Math.PI));
         this.transform.rotation = Quaternion.Lerp(this.transform.rotation, toRotation, 0.07f);
+        //Debug.Log(targetEnemy);
     }
 
     private void SetTargetEnemy(BaseEnemy enemy)
@@ -319,23 +353,19 @@ public abstract class BaseTurret : MonoBehaviour
             this.SetTargetEnemy(null);
             return;
         }
-        var deletedEnemy = this.enemiesToAttack.Dequeue();
-        if (this.enemiesToAttack.Count == 0)
-        {
-            this.SetTargetEnemy(null);
-            return;
-        }
+        var deletedEnemy = this.enemiesToAttack.Remove(enemy);
+        this.SetTargetEnemy(null);
         // queue는 비어있지 않다. 근데 다음적이 게임 scene에 있는지 없는지 확인이 필요하다.
-        var nextEnemy = this.enemiesToAttack.Peek();
-        while (nextEnemy == null && this.enemiesToAttack.Count > 0)
-        {
-            nextEnemy = this.enemiesToAttack.Dequeue();
-            if (this.enemiesToAttack.Count == 0)
-            {
-                nextEnemy = null;
-            }
-        }
-        this.SetTargetEnemy(nextEnemy);
+        // var nextEnemy = this.enemiesToAttack.;
+        // while (nextEnemy == null && this.enemiesToAttack.Count > 0)
+        // {
+        //     nextEnemy = this.enemiesToAttack.Dequeue();
+        //     if (this.enemiesToAttack.Count == 0)
+        //     {
+        //         nextEnemy = null;
+        //     }
+        // }
+        // this.SetTargetEnemy(nextEnemy);
     }
 
     void MakeAttackRangeVisible()
@@ -359,7 +389,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void InstantiateUI()
     {
-        if(isShowingUI) return;
+        if (isShowingUI) return;
 
         MakeAttackRangeVisible();
 
@@ -368,43 +398,47 @@ public abstract class BaseTurret : MonoBehaviour
 
         Direction direction = Direction.None;
 
-        if(centerPos.x > this.transform.position.x && centerPos.y > this.transform.position.y)
+        if (centerPos.x > this.transform.position.x && centerPos.y > this.transform.position.y)
         {
             // turret 위치는 왼쪽 아래
             direction = Direction.BottomLeft;
 
-        } else if(centerPos.x > this.transform.position.x && centerPos.y < this.transform.position.y)
+        }
+        else if (centerPos.x > this.transform.position.x && centerPos.y < this.transform.position.y)
         {
             // turret 위치는 왼쪽 위
             direction = Direction.TopLeft;
-           
-        } else if(centerPos.x < this.transform.position.x && centerPos.y > this.transform.position.y)
+
+        }
+        else if (centerPos.x < this.transform.position.x && centerPos.y > this.transform.position.y)
         {
             // turret 위치는 오른쪽 아래
             direction = Direction.BottomRight;
-       
-        } else if(centerPos.x < this.transform.position.x && centerPos.y < this.transform.position.y)
+
+        }
+        else if (centerPos.x < this.transform.position.x && centerPos.y < this.transform.position.y)
         {
             // turret 위치는 오른쪽 위
             direction = Direction.TopRight;
         }
-   
-        switch (direction) {
+
+        switch (direction)
+        {
             case Direction.TopLeft:
-                worldPoint.x += turretSpace.spriteBounds.x/2;
-                worldPoint.y += turretSpace.spriteBounds.y/2;
+                worldPoint.x += turretSpace.spriteBounds.x / 2;
+                worldPoint.y += turretSpace.spriteBounds.y / 2;
                 break;
             case Direction.TopRight:
-                worldPoint.x -= turretSpace.spriteBounds.x/2;
-                worldPoint.y += turretSpace.spriteBounds.y/2;
+                worldPoint.x -= turretSpace.spriteBounds.x / 2;
+                worldPoint.y += turretSpace.spriteBounds.y / 2;
                 break;
             case Direction.BottomLeft:
-                worldPoint.x += turretSpace.spriteBounds.x/2;
-                worldPoint.y -= turretSpace.spriteBounds.y/2;
+                worldPoint.x += turretSpace.spriteBounds.x / 2;
+                worldPoint.y -= turretSpace.spriteBounds.y / 2;
                 break;
             case Direction.BottomRight:
-                worldPoint.x -= turretSpace.spriteBounds.x/2;
-                worldPoint.y -= turretSpace.spriteBounds.y/2;
+                worldPoint.x -= turretSpace.spriteBounds.x / 2;
+                worldPoint.y -= turretSpace.spriteBounds.y / 2;
                 break;
         }
         Vector3 screenPoint = mainCamera.WorldToScreenPoint(worldPoint);
@@ -415,7 +449,7 @@ public abstract class BaseTurret : MonoBehaviour
         instantiatedTurretUI.transform.SetParent(canvasUI.transform, false);
 
         var turretUI_Class = instantiatedTurretUI.GetComponent<TurretUI>();
-        turretUI_Class.turret = this; 
+        turretUI_Class.turret = this;
 
         // Adjust its position using the RectTransform. Convert screenPoint to local point in canvas
         RectTransform rectTransform = instantiatedTurretUI.GetComponent<RectTransform>();
@@ -424,7 +458,8 @@ public abstract class BaseTurret : MonoBehaviour
         //localPoint.x += rectTransform.rect.width / 2;
         // localPoint.y -= rectTransform.rect.height / 2;
 
-        switch (direction) {
+        switch (direction)
+        {
             case Direction.TopLeft:
                 localPoint.x += rectTransform.rect.width / 2;
                 localPoint.y -= rectTransform.rect.height / 2;
@@ -450,16 +485,51 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void SellTurret()
     {
+        AdditionalStaticValuesForGame2.GetInstance().SetTurretInstallStatus(turretSpace.rowIndex, turretSpace.columnIndex, false);
         StaticValues.GetInstance().gold += this.sellPrice;
         //StaticValues.GetInstance().isShowingUI = false;
-        this.turretSpace.ShowGetGold(this.upgradePrice,true);
+        this.turretSpace.ShowGetGold(this.upgradePrice, true);
         turretSpace.installedTurret = null;
+        turretSpace.isInstalled = false;
+        turretSpace.TurnOnIsTrigger();
         Destroy(this.gameObject);
+    }
+
+    public void DebugTarget()
+    {
+        if (isDebugMode)
+        {
+            // if (targetEnemy != null)
+            // {
+            //     Debug.Log(targetEnemy + "is current Target");
+            // }
+            Debug.Log("Enemies in queue: " + enemiesToAttack.Count);
+
+            // foreach (BaseEnemy enemyToAttack in enemiesToAttack)
+            // {
+            //     Debug.Log(enemyToAttack + "is in queue");
+            // }
+        }
+    }
+
+    public void DebugRay()
+    {
+        if (isDebugMode)
+        {
+            attackCoolCount += Time.deltaTime * attackSpeed;
+
+            var range = this.attackRange.GetComponent<CircleCollider2D>().bounds.size;
+
+            var ray = new Ray(this.transform.position, this.transform.right);
+            var hit = Physics2D.RaycastAll(ray.origin, ray.direction, range.x / 2);
+            // // show ray
+            Debug.DrawRay(ray.origin, ray.direction * range.x / 2, Color.red);
+        }
     }
 
     // public void ChangeSpeed(float gameSpeed)
     // {
-            
+
     // }
     // void OnMouseDown() // collider가 있으면 클릭가능
     // {
@@ -467,7 +537,7 @@ public abstract class BaseTurret : MonoBehaviour
     //         this.InstantiateUI();
     //     }
     // }
-    
+
     // public void DeleteUI(Vector3 mousePos)
     // {
     //     Debug.Log(mousePos);
@@ -484,7 +554,7 @@ public abstract class BaseTurret : MonoBehaviour
     //     }
     // }
 
-    
+
     // private Vector3 WorldToScreenPoint(Vector2 screenPoint)
     // {
     //     return mainCamera.WorldToScreenPoint(screenPoint);

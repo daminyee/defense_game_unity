@@ -7,7 +7,7 @@ public class TankingEnemy : BaseEnemy
     // Start is called before the first frame update
     void Start()
     {
-
+        SetMap();
     }
 
     // Update is called once per frame

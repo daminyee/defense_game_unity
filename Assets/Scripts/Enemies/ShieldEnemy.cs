@@ -7,7 +7,7 @@ public class ShieldEnemy : BaseEnemy
     public GameObject sheildPrefab;
     void Start()
     {
-        
+        SetMap();
     }
 
     // Update is called once per frame

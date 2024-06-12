@@ -181,7 +181,7 @@ GameObject:
   - component: {fileID: 2104671455683301146}
   m_Layer: 0
   m_Name: FastEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -220,11 +220,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  moveDistance: 0
   head: {fileID: 3718273616468888328}
   body: {fileID: 3718273616762926908}
   canvasUI: {fileID: 0}
   mainCamera: {fileID: 0}
   currentWayPointIndex: 0
+  isDie: 0
   isSlowed: 0
   isOnSlowField: 0
   hp: 2

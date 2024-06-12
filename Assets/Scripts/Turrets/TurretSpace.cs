@@ -12,6 +12,8 @@ public class TurretSpace : MonoBehaviour
     public Vector2 spriteBounds = new Vector2();
 
     private int originalSortingOrder = 0;
+    public int rowIndex;
+    public int columnIndex;
 
     void Start()
     {
@@ -22,7 +24,7 @@ public class TurretSpace : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
     public void ShowGetGold(int usedGold, bool getGold)
@@ -34,11 +36,12 @@ public class TurretSpace : MonoBehaviour
         usedGoldText.AddComponent<RectTransform>();
         usedGoldText.AddComponent<CanvasRenderer>();
         usedGoldText.AddComponent<UnityEngine.UI.Text>();
-        if(getGold)
+        if (getGold)
         {
             usedGoldText.GetComponent<UnityEngine.UI.Text>().text = "+" + usedGold;
             usedGoldText.GetComponent<UnityEngine.UI.Text>().color = Color.green;
-        } else
+        }
+        else
         {
             usedGoldText.GetComponent<UnityEngine.UI.Text>().text = "-" + usedGold;
             usedGoldText.GetComponent<UnityEngine.UI.Text>().color = Color.red;
@@ -86,9 +89,9 @@ public class TurretSpace : MonoBehaviour
 
     // void OnTriggerStay2D(Collider2D collider)
     // {
-        
+
     // }
-    
+
     // void OnTriggerExit2D(Collider2D collider)
     // {
     //     var draggingTurret = collider.GetComponent<BaseTurret>();
@@ -102,14 +105,22 @@ public class TurretSpace : MonoBehaviour
 
     public void HighlightSpace()
     {
-        if(isInstalled) return;
+        if (isInstalled) return;
         this.putOnEffect.SetActive(true);
         this.GetComponent<SpriteRenderer>().sortingOrder = originalSortingOrder + 1;
     }
-
     public void UnhighlightSpace()
     {
         this.GetComponent<SpriteRenderer>().sortingOrder = originalSortingOrder;
         this.putOnEffect.SetActive(false);
+    }
+
+    public void TurnOnIsTrigger()
+    {
+        this.gameObject.GetComponent<BoxCollider2D>().isTrigger = true;
+    }
+    public void TurnOffIsTrigger()
+    {
+        this.gameObject.GetComponent<BoxCollider2D>().isTrigger = false;
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 // HW1
 // Enemy 종류 3가지 만들기 (Enemy1, Enemy2, Enemy3)
@@ -14,6 +15,8 @@ public abstract class BaseEnemy : MonoBehaviour
 {
 
     public WayPoint[] path;
+    public float moveDistance;
+    private Vector2 prevPos;
 
     public GameObject head;
     public GameObject body;
@@ -21,8 +24,6 @@ public abstract class BaseEnemy : MonoBehaviour
     public Canvas canvasUI;
     public Camera mainCamera;
 
-
-    public int currentWayPointIndex = 0;
     private bool isMoving = false;
     public bool isDie = false;
 
@@ -35,30 +36,202 @@ public abstract class BaseEnemy : MonoBehaviour
     public float originalSpeed = 1.0f;
     public float speed;
 
+    public int currentWayPointIndex = 0;
+    public Vector2 currentWayPointPos;
+    public LargeTurretSpace largeTurretSpace;
+
+    GameObject map;
+
+    Vector2 currentPos;
+    Tuple<int, int> currentIndex;
+
+    public List<Tuple<int, int>> wayPoints;
+
+    public int rowIndex;
+    public int columnIndex;
+
+    private bool isPassedGoal = false;
+    private float CountOfDie = 0f;
+
+    //public float moveSpeed;
+
+
     public void Initialize(WayPoint[] path, Camera mainCamera, Canvas canvasUI, int currentWayPointIndex, Vector2 spawnPosition)
     {
-        originalSpeed = speed;
+        if (mainCamera.gameObject.GetComponent<Spawn1>())
+        {
+            this.path = path;
+            this.currentWayPointIndex = currentWayPointIndex;
+            this.transform.position = spawnPosition;
+        }
 
-        this.path = path;
+        originalSpeed = speed;
+        StaticValues.GetInstance().livingEnemyCount += 1;
+
         this.mainCamera = mainCamera;
         this.canvasUI = canvasUI;
+    }
 
-        this.currentWayPointIndex = currentWayPointIndex;
-        this.transform.position = spawnPosition;
+    // public void Initialize(Camera mainCamera, Canvas canvasUI, int currentWayPointIndex, Vector2 spawnPosition)
+    // {
+    //     originalSpeed = speed;
+    //     StaticValues.GetInstance().livingEnemyCount += 1;
+
+    //     this.mainCamera = mainCamera;
+    //     this.canvasUI = canvasUI;
+
+    //     this.currentWayPointIndex = currentWayPointIndex;
+    //     this.transform.position = spawnPosition;
+    //     FindWayPoint();
+    //     SetMap();
+    // }
+
+    public void SetMap()
+    {
+        GameObject mapObject = GameObject.FindGameObjectWithTag("Map");
+        map = mapObject;
+
+        var mainCamera = Camera.main;
+        largeTurretSpace = mainCamera.GetComponent<LargeTurretSpace>();
     }
 
     public void MoveToNextWayPoint()
     {
-        if(StaticValues.GetInstance().isPaused){
+        var mainCamera = Camera.main;
+        if (mainCamera.gameObject.GetComponent<Spawn1>())
+        {
+            MoveWithNumberWayPoint();
+        }
+        else
+        {
+            MoveWithTupleWayPoint();
+        }
+    }
+
+    public void MoveWithTupleWayPoint()
+    {
+        if (StaticValues.GetInstance().isPaused)
+        {
             return;
         }
-        if (this.currentWayPointIndex < this.path.Length)
+
+        //Debug.Log("맵 : " + map.name);
+
+        currentPos = new Vector2(Mathf.Abs(largeTurretSpace.topLeftOfSpawnBox.x - body.transform.position.x), Mathf.Abs(largeTurretSpace.topLeftOfSpawnBox.y - body.transform.position.y));
+
+        rowIndex = (int)(currentPos.y / largeTurretSpace.turretSpaceSize.y);
+        columnIndex = (int)(currentPos.x / largeTurretSpace.turretSpaceSize.x);
+
+        currentIndex = new Tuple<int, int>(rowIndex, columnIndex);
+
+        if (!isPassedGoal)
         {
 
+            if (wayPoints != null)
+            {
+                var wayPointColumnIndex = wayPoints[currentWayPointIndex].Item2;
+                var wayPointRowIndex = wayPoints[currentWayPointIndex].Item1;
+                var largeTurretSpaceLeftTopX = largeTurretSpace.topLeftOfSpawnBox.x;
+                var largeTurretSpaceLeftTopY = largeTurretSpace.topLeftOfSpawnBox.y;
+                var turretSpaceSize = largeTurretSpace.turretSpaceSize.x;
+
+                //Debug.Log("목표 지점 : " + wayPointRowIndex + "," + wayPointColumnIndex);
+
+                var wayPointX = wayPointColumnIndex * turretSpaceSize + largeTurretSpaceLeftTopX + turretSpaceSize / 2;
+                var wayPointY = largeTurretSpaceLeftTopY - wayPointRowIndex * turretSpaceSize - turretSpaceSize / 2;
+
+                // var topLeftDirection = new Vector2(largeTurretSpaceLeftTopX, largeTurretSpaceLeftTopY) - new Vector2(transform.position.x, transform.position.y);
+                // Debug.DrawRay(transform.position, topLeftDirection, Color.green);
+
+                var wayPointDirection = new Vector2(wayPointX, wayPointY) - new Vector2(transform.position.x, transform.position.y);
+                Debug.DrawRay(transform.position, wayPointDirection, Color.blue);
+
+                var destination = new Vector3(wayPointX, wayPointY, 0);
+                this.transform.position = Vector3.MoveTowards(transform.position, destination, Time.deltaTime * speed);
+
+                Vector3 directionToTarget = destination - transform.position;
+
+                // Calculate the angle in degrees
+                float angle = Mathf.Atan2(directionToTarget.y, directionToTarget.x) * Mathf.Rad2Deg;
+
+                // Create a quaternion rotation around the Z-axis
+                Quaternion targetRotation = Quaternion.Euler(0f, 0f, angle);
+
+                // Interpolate between current rotation and target rotation using Lerp
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+
+
+                if (new Vector2(transform.position.x, transform.position.y) == new Vector2(wayPointX, wayPointY))
+                {
+                    currentWayPointIndex += 1;
+                    if (wayPoints.Count <= currentWayPointIndex)
+                    {
+                        isPassedGoal = true;
+                    }
+                }
+            }
+            else
+            {
+                transform.Translate(Time.deltaTime * speed, 0, 0);
+            }
+        }
+        else // 만약 도착지점에 도착했다면
+        {
+            transform.Translate(Time.deltaTime * speed, 0, 0);
+            CountOfDie += Time.deltaTime;
+            //Debug.Log(CountOfDie);
+            if (CountOfDie > 2f)
+            {
+                if (!isDie)
+                {
+                    var camera = GameObject.FindGameObjectWithTag("MainCamera");
+                    var player = camera.GetComponent<Player>();
+                    player.GotHit();
+                    Die();
+                }
+            }
+        }
+
+        var ray = new Ray(this.transform.position, new Vector3(1, 0));
+        var hits = Physics2D.RaycastAll(ray.origin, ray.direction, map.gameObject.GetComponent<SpriteRenderer>().bounds.size.x);
+
+        var isTurretBlocking = false;
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            RaycastHit2D hit = hits[i];
+            var turretSpace = hit.transform.gameObject.GetComponent<TurretSpace>();
+
+            if (turretSpace != null && !turretSpace.GetComponent<BoxCollider2D>().isTrigger)
+            {
+                isTurretBlocking = true;
+            }
+        }
+        Debug.DrawRay(ray.origin, ray.direction * map.gameObject.GetComponent<SpriteRenderer>().bounds.size.x, Color.red);
+
+        if (isTurretBlocking)
+        {
+
+        }
+    }
+
+    public void MoveWithNumberWayPoint()
+    {
+        if (this.currentWayPointIndex < this.path.Length)
+        {
+            if (prevPos == null)
+            {
+                prevPos = this.transform.position;
+            }
+            moveDistance += Vector2.Distance(prevPos, this.transform.position);
+            prevPos = this.transform.position;
+
+            //Debug.Log("currentIndex : " + currentWayPointIndex);
+            Debug.Log("current ", this.path[this.currentWayPointIndex]);
             var targetPosition = this.path[this.currentWayPointIndex].transform.position;
             this.transform.position = Vector3.MoveTowards(this.transform.position, targetPosition, this.speed * Time.deltaTime);
 
-           // Get the direction to the target position
+            // Get the direction to the target position
             Vector3 directionToTarget = targetPosition - transform.position;
 
             // Calculate the angle in degrees
@@ -69,20 +242,139 @@ public abstract class BaseEnemy : MonoBehaviour
 
             // Interpolate between current rotation and target rotation using Lerp
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
-            
+
             if (this.transform.position == this.path[this.currentWayPointIndex].transform.position)
             {
                 this.currentWayPointIndex++;
-                if(this.currentWayPointIndex == this.path.Length)
+                if (this.currentWayPointIndex == this.path.Length)
                 {
                     var camera = GameObject.FindGameObjectWithTag("MainCamera");
                     var player = camera.GetComponent<Player>();
 
                     player.GotHit();
+                    StaticValues.GetInstance().livingEnemyCount -= 1;
                     Destroy(this.gameObject);
+                    if (StaticValues.GetInstance().hp > 0)
+                    {
+                        var isEnemyCleared = StaticValues.GetInstance().livingEnemyCount == 0;
+                        if (isEnemyCleared && Camera.main.GetComponent<Player>().isLastLevel)
+                        {
+                            // Game Over?
+                            Camera.main.GetComponent<Player>().StageClear();
+                            Debug.Log(isEnemyCleared);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    public void FindWayPoint()
+    {
+        // BFS로 다음 waypoint를 정해야 한다, 
+
+        //bool isReached = true;
+
+        var spaceDict = AdditionalStaticValuesForGame2.GetInstance().turretSpace;
+
+        var hasCheckedAvailability = new Dictionary<Tuple<int, int>, Boolean>();
+
+        Queue<Tuple<int, int>> queue = new Queue<Tuple<int, int>>();
+        var visitingBlock = currentIndex;
+        hasCheckedAvailability[visitingBlock] = true;
+        queue.Enqueue(visitingBlock);
+
+        int maxTurretSpaceColumnCount = AdditionalStaticValuesForGame2.GetInstance().maxTurretSpaceColumnCount;
+        int maxTurretSpaceRowCount = AdditionalStaticValuesForGame2.GetInstance().maxTurretSpaceRowCount;
+
+        var loopCount = 0;
+        const int maxLoopCount = 200;
+
+        var previousIndexForDestination = new Dictionary<Tuple<int, int>, Tuple<int, int>>();
+
+        while (visitingBlock.Item2 < maxTurretSpaceColumnCount - 1) // 목적지(맨 오른쪽 열)에 도착할때까지 계속 반복
+        {
+            loopCount += 1;
+            if (loopCount > maxLoopCount)
+            {
+                break;
+            }
+            visitingBlock = queue.Dequeue();
+
+            var leftBlock = new Tuple<int, int>(visitingBlock.Item1, visitingBlock.Item2 - 1);
+            var rightBlock = new Tuple<int, int>(visitingBlock.Item1, visitingBlock.Item2 + 1);
+            var upBlock = new Tuple<int, int>(visitingBlock.Item1 - 1, visitingBlock.Item2);
+            var downBlock = new Tuple<int, int>(visitingBlock.Item1 + 1, visitingBlock.Item2);
+
+            bool hasCheckedLeftBlock = hasCheckedAvailability.ContainsKey(leftBlock) == true;
+            bool hasCheckedRightBlock = hasCheckedAvailability.ContainsKey(rightBlock) == true;
+            bool hasCheckedUpBlock = hasCheckedAvailability.ContainsKey(upBlock) == true;
+            bool hasCheckedDownBlock = hasCheckedAvailability.ContainsKey(downBlock) == true;
+
+            bool isLeftBlockOutside = spaceDict.TryGetValue(leftBlock, out var isLeftWithTurret) == false;
+            bool isRightBlockOutside = spaceDict.TryGetValue(rightBlock, out var isRightWithTurret) == false;
+            bool isUpBlockOutside = spaceDict.TryGetValue(upBlock, out var isUpWithTurret) == false;
+            bool isDownBlockOutside = spaceDict.TryGetValue(downBlock, out var isDownWithTurret) == false;
+
+            bool isLeftBlockNotValid = isLeftBlockOutside || isLeftWithTurret || hasCheckedLeftBlock;
+            bool isRightBlockNotValid = isRightBlockOutside || isRightWithTurret || hasCheckedRightBlock;
+            bool isUpBlockNotValid = isUpBlockOutside || isUpWithTurret || hasCheckedUpBlock;
+            bool isDownBlockNotValid = isDownBlockOutside || isDownWithTurret || hasCheckedDownBlock;
+
+            if (!isLeftBlockNotValid)
+            {
+                queue.Enqueue(leftBlock);
+                hasCheckedAvailability[leftBlock] = true;
+                previousIndexForDestination[leftBlock] = visitingBlock;
+            }
+            if (!isRightBlockNotValid)
+            {
+                queue.Enqueue(rightBlock);
+                hasCheckedAvailability[rightBlock] = true;
+                previousIndexForDestination[rightBlock] = visitingBlock;
+            }
+            if (!isUpBlockNotValid)
+            {
+                queue.Enqueue(upBlock);
+                hasCheckedAvailability[upBlock] = true;
+                previousIndexForDestination[upBlock] = visitingBlock;
+            }
+            if (!isDownBlockNotValid)
+            {
+                queue.Enqueue(downBlock);
+                hasCheckedAvailability[downBlock] = true;
+                previousIndexForDestination[downBlock] = visitingBlock;
+            }
+        }
+
+        List<Tuple<int, int>> pathToDestination = new List<Tuple<int, int>>();
+        loopCount = 0;
+
+        while (previousIndexForDestination[visitingBlock] != currentIndex)
+        {
+            //Debug.Log(visitingBlock);
+            loopCount += 1;
+            if (loopCount > maxLoopCount)
+            {
+                break;
+            }
+            pathToDestination.Add(previousIndexForDestination[visitingBlock]);
+            visitingBlock = previousIndexForDestination[visitingBlock];
+        }
+
+        pathToDestination.Reverse();
+        wayPoints = pathToDestination;
+        currentWayPointIndex = 0;
+
+        // foreach (var space in largeTurretSpace.turretSpaces.Values)
+        // {
+        //     space.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 1);
+        // }
+
+        // foreach (var path in pathToDestination)
+        // {
+        //     largeTurretSpace.turretSpaces[path].GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1);
+        // }
     }
 
     public void Pause()
@@ -93,7 +385,7 @@ public abstract class BaseEnemy : MonoBehaviour
     public void GotHit(float attackDamage)
     {
         this.hp -= attackDamage;
-        if(hp <= 0)
+        if (hp <= 0)
         {
             Die();
         }
@@ -102,13 +394,21 @@ public abstract class BaseEnemy : MonoBehaviour
     public void Die()
     {
         //Destroy(this.gameObject);
-        if(!isDie)
+        if (!isDie)
         {
+            isDie = true;
             StaticValues.GetInstance().gold += this.gold;
+            var isLastEnemy = StaticValues.GetInstance().livingEnemyCount == 1;
+            if (isLastEnemy && Camera.main.GetComponent<Player>().isLastLevel)
+            {
+                // Game Over?
+                Camera.main.GetComponent<Player>().StageClear();
+                Debug.Log(isLastEnemy);
+            }
+            StaticValues.GetInstance().livingEnemyCount -= 1;
             ShowGetGold(this.gold);
-            //StartCoroutine(FadeOut());
+            Debug.Log(StaticValues.GetInstance().livingEnemyCount);
         }
-        isDie = true;
     }
 
     public void ShowGetGold(int getGold)
@@ -157,10 +457,10 @@ public abstract class BaseEnemy : MonoBehaviour
 
     public void SlowDown(float slowPower)
     {
-        if(!isSlowed)
+        if (!isSlowed)
         {
             this.speed -= slowPower;
-            if(speed < 0)
+            if (speed < 0)
             {
                 speed = 0.1f;
             }
@@ -183,10 +483,10 @@ public abstract class BaseEnemy : MonoBehaviour
 
     public void OnSlowField(float slowPower)
     {
-        if(!isOnSlowField)
+        if (!isOnSlowField)
         {
             this.speed -= slowPower;
-            if(speed < 0)
+            if (speed < 0)
             {
                 speed = 0.1f;
             }
@@ -213,7 +513,8 @@ public abstract class BaseEnemy : MonoBehaviour
 
             yield return null; // while문 안에 yield return null을 넣어주는 이유는 while문이 돌면서 1프레임씩 기다려주기 위함
         }
-        Destroy(gameObject);
+        //Debug.Log();
         Destroy(getGoldText);
+        Destroy(gameObject);
     }
 }

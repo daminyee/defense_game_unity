@@ -15,20 +15,20 @@ public class Laser : MonoBehaviour
         childLaser.isTrigger = true;
         childLaser.size = new Vector2(0.1f, 0.1f);
         childLaser.offset = new Vector2(0, 0);
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        Debug.Log(collider);
+        //Debug.Log(collider);
         var enemy = collider.GetComponent<BaseEnemy>();
-        if(enemy != null)
+        if (enemy != null)
         {
             //Debug.Log(enemy);
             enemy.GotHit(attackDamage);

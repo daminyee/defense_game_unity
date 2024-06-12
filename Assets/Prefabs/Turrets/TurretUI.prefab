@@ -683,6 +683,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turret: {fileID: 0}
+  upgradeButton: {fileID: 5521742911552921128}
+  sellButton: {fileID: 5521742912307722941}
+  upgradePriceText: {fileID: 5521742911782287856}
+  sellPriceText: {fileID: 5521742910768888891}
 --- !u!1 &5521742912834058927
 GameObject:
   m_ObjectHideFlags: 0

@@ -405,7 +405,7 @@ GameObject:
   - component: {fileID: 2753477252735167108}
   m_Layer: 0
   m_Name: MiniBossEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -468,11 +468,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path: []
+  moveDistance: 0
   head: {fileID: 1778306438195055416}
   body: {fileID: 1778306438960350804}
   canvasUI: {fileID: 0}
   mainCamera: {fileID: 0}
   currentWayPointIndex: 0
+  isDie: 0
   isSlowed: 0
   isOnSlowField: 0
   hp: 0

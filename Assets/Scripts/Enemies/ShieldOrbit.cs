@@ -10,8 +10,8 @@ public class ShieldOrbit : MonoBehaviour
     public float speed;
 
     void Start()
-    {   
-        this.speed = 150f;
+    {
+        this.speed = 250f;
     }
 
     // Update is called once per frame
