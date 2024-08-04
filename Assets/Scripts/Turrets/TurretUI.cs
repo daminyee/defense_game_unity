@@ -47,7 +47,6 @@ public class TurretUI : MonoBehaviour
 
     public void Sell()
     {
-        //turret.SellTurret();
         turret.SellTurret();
         StaticValues.GetInstance().openedTurretUI = null;
         Destroy(this.gameObject);

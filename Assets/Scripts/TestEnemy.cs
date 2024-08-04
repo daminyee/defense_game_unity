@@ -137,7 +137,7 @@ public class TestEnemy : MonoBehaviour
 
         //bool isReached = true;
 
-        var spaceDict = AdditionalStaticValuesForGame2.GetInstance().turretSpace;
+        var spaceDict = AdditionalStaticValuesForGame2.GetInstance().turrets;
 
         var hasCheckedAvailability = new Dictionary<Tuple<int, int>, Boolean>();
 

@@ -14,12 +14,12 @@ public class BlizardTurret : BaseTurret
 
     void Update()
     {
-        if(!this.isInstalledTurret) return;
+        if (!this.isInstalledTurret) return;
 
         WatchEnemy();
-        if(targetEnemy != null)
+        if (targetEnemy != null)
         {
-            if(attackCoolCount > 2)
+            if (attackCoolCount > 2)
             {
                 AttackEnemy();
                 attackCoolCount = 0;
@@ -32,13 +32,6 @@ public class BlizardTurret : BaseTurret
     {
         var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
         var bullet = newBullet.GetComponent<IceBullet>();
-        bullet.Initialize(this.attackPower,this.transform.position, this.slowPower);
+        bullet.Initialize(this.attackPower, this.transform.position, this.slowPower);
     }
-
-    // public override void UpgradeTurret()
-    // {
-    //     this.attackPower += 0.5f;
-    //     this.attackSpeed += 0.2f;
-    //     this.slowPower += 0.1f;
-    // }
 }

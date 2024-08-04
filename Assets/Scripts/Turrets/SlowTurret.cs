@@ -14,12 +14,12 @@ public class SlowTurret : BaseTurret
 
     void Update()
     {
-        if(!this.isInstalledTurret) return;
+        if (!this.isInstalledTurret) return;
 
         WatchEnemy();
-        if(targetEnemy != null)
+        if (targetEnemy != null)
         {
-            if(attackCoolCount > 2)
+            if (attackCoolCount > 2)
             {
                 AttackEnemy();
                 attackCoolCount = 0;
@@ -32,27 +32,6 @@ public class SlowTurret : BaseTurret
     {
         var newBullet = Instantiate(bulletPrefab, this.transform.position, this.transform.rotation);
         var bullet = newBullet.GetComponent<Bullet>();
-        bullet.Initialize(this.attackPower,this.transform.position, this.slowPower, true);
+        bullet.Initialize(this.attackPower, this.transform.position, this.slowPower, true);
     }
-
-    // public override void UpgradeTurret()
-    // {
-    //     this.attackPower += 0.2f;
-    //     this.attackSpeed += 0.2f;
-    //     upgradeCount += 1;
-    //     if(upgradeCount >= 3)
-    //     {
-    //         GameObject newTurretGameObject = Instantiate(blizardTurretPrefab, this.transform.position, Quaternion.identity);
-    //         BlizardTurret blizardTurret= newTurretGameObject.GetComponent<BlizardTurret>();
-
-    //         turretSpace.installedTurret = blizardTurret;
-    //         blizardTurret.turretSpace = this.turretSpace;
-    //         blizardTurret.canvasUI = this.canvasUI;
-    //         blizardTurret.mainCamera = this.mainCamera;
-    //         blizardTurret.isInstalledTurret = true;
-    //         blizardTurret.MakeAttackRangeInvisible();
-
-    //         Destroy(this.gameObject);
-    //     }
-    // }
 }

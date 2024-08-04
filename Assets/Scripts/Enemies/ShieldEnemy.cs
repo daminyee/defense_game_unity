@@ -10,7 +10,6 @@ public class ShieldEnemy : BaseEnemy
         SetMap();
     }
 
-    // Update is called once per frame
     void Update()
     {
         this.MoveToNextWayPoint();

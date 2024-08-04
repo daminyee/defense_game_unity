@@ -10,7 +10,7 @@ public class SniperBullet : MonoBehaviour
     public bool shouldDestroyWhenOutOfRange;
     void Start()
     {
-        
+
     }
 
     void Update()
@@ -21,7 +21,7 @@ public class SniperBullet : MonoBehaviour
     void OnTriggerEnter2D(Collider2D collider)
     {
         var enemy = collider.GetComponent<BaseEnemy>();
-        if(enemy != null)
+        if (enemy != null)
         {
             enemy.GotHit(attackDamage);
         }
@@ -34,8 +34,6 @@ public class SniperBullet : MonoBehaviour
     public void Initialize(float attackDamage, Vector2 shootingOrigin, bool shouldDestroyWhenOutOfRange = true)
     {
         this.attackDamage = attackDamage;
-        //this.attackRange = attackRange;
-        //this.attackRangeRadius = attackRangeRadius;
         this.shootingOrigin = shootingOrigin;
         this.shouldDestroyWhenOutOfRange = shouldDestroyWhenOutOfRange;
     }

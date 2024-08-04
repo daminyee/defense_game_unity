@@ -38,28 +38,4 @@ public class NormalTurret : BaseTurret
         var bullet = newBullet.GetComponent<Bullet>();
         bullet.Initialize(this.attackPower, this.transform.position, 0, false);
     }
-
-    //     public void UpgradeTurret()
-    //     {
-    //         this.attackPower += 1;
-    //         this.attackSpeed += 0.5f;
-    //         upgradeCount += 1;
-    //         if(upgradeCount >= 3)
-    //         {
-    //             GameObject newTurretGameObject = Instantiate(tripleTurretPrefab, this.transform.position, Quaternion.identity);
-    //             BlizardTurret tripleTurret= newTurretGameObject.GetComponent<BlizardTurret>();
-
-    //             turretSpace.installedTurret = tripleTurret;
-    //             tripleTurret.turretSpace = this.turretSpace;
-    //             tripleTurret.canvasUI = this.canvasUI;
-    //             tripleTurret.mainCamera = this.mainCamera;
-    //             tripleTurret.isInstalledTurret = true;
-    //             tripleTurret.MakeAttackRangeInvisible();
-
-    //             Destroy(this.gameObject);
-    //         }
-    //     }
-    //     // public override void SellTurret()
-    //     // {
-    //     // }
 }

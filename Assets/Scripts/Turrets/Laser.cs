@@ -18,7 +18,6 @@ public class Laser : MonoBehaviour
 
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -26,11 +25,9 @@ public class Laser : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        //Debug.Log(collider);
         var enemy = collider.GetComponent<BaseEnemy>();
         if (enemy != null)
         {
-            //Debug.Log(enemy);
             enemy.GotHit(attackDamage);
         }
     }
@@ -47,7 +44,7 @@ public class Laser : MonoBehaviour
         {
             time += Time.deltaTime;
             gameObject.transform.GetChild(0).GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, gameObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().color.a - 0.01f);
-            //GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, GetComponent<SpriteRenderer>().color.a - 0.015f);
+
             yield return null; // while문 안에 yield return null을 넣어주는 이유는 while문이 돌면서 1프레임씩 기다려주기 위함
         }
         Destroy(gameObject);

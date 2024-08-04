@@ -120,18 +120,18 @@ public class StaticValues
             1.0f, 1.5f, 2.0f, 3.0f
         };
         this.livingEnemyCount = 0;
-        this.levels = new Level[2]
+        this.levels = new Level[10]
         {
-            new Level(5, 0, 0, 0, 3, 1),
-            new Level(5, 1, 1, 1, 1, 1),
-            // new Level(10, 5, 0, 0, 2, 1),
-            // new Level(10, 10, 0, 0, 3, 1),
-            // new Level(10, 10, 0, 1, 0, 1),
-            // new Level(10, 10, 5, 0, 3, 1),
-            // new Level(15, 10, 5, 0, 3, 1),
-            // new Level(15, 15, 5, 0, 2, 2),
-            // new Level(25, 20, 10, 0, 2, 2),
-            // new Level(30, 30, 15, 2, 3, 3)
+            new Level(0, 0, 0, 0, 2, 0),
+            new Level(0, 0, 0, 0, 1, 0),
+            new Level(0, 0, 0, 0, 2, 0),
+            new Level(0, 0, 0, 0, 3, 0),
+            new Level(0, 0, 0, 0, 0, 0),
+            new Level(0, 0, 0, 0, 3, 0),
+            new Level(0, 0, 0, 0, 3, 0),
+            new Level(0, 0, 0, 0, 2, 0),
+            new Level(0, 0, 0, 0, 2, 0),
+            new Level(0, 0, 0, 0, 3, 0)
         };
 
         this.hp = 500;

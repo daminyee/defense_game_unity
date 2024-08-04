@@ -72,23 +72,17 @@ public class Player : MonoBehaviour
         StaticValues.GetInstance().centerPos = centerPoint.transform.position;
     }
 
-    // Update is called once per frame
     void Update()
     {
         currentHpText.text = "HP : " + StaticValues.GetInstance().hp.ToString();
         currentGoldText.text = "Gold : " + StaticValues.GetInstance().gold.ToString();
         timerText.text = "Next wave : " + (Mathf.RoundToInt(30 - this.restTimer)).ToString() + "s";
 
-        // if StaticValues.GetInstance().draggedTurret != null){
-        //     Debug.Log StaticValues.GetInstance().draggedTurret.name);
-        // }
-
         timer += Time.deltaTime;
         if (timer > 1.0f)
         {
             StaticValues.GetInstance().gold = StaticValues.GetInstance().gold + 1;
             timer = 0.0f;
-            // SpawnEnemy(normalEnemyPrefab.GetComponent<BaseEnemy>());
         }
 
         if (!isRestTime)
@@ -106,6 +100,7 @@ public class Player : MonoBehaviour
                     if (currentLevelStatus.maxEnemyCountDict[enemyType] < StaticValues.GetInstance().levels[this.currentLevelIndex].maxEnemyCountDict[enemyType])
                     {
                         SpawnEnemy(enemyType);
+
                         currentLevelStatus.maxEnemyCountDict[enemyType]++;
                     }
                 }
@@ -219,11 +214,6 @@ public class Player : MonoBehaviour
         if (currentLevelIndex == StaticValues.GetInstance().levels.Length)
         {
             isLastLevel = true;
-            Debug.Log(isLastLevel);
-            // if (StaticValues.GetInstance().livingEnemyCount == 0)
-            // {
-            //     StageClear();
-            // }
         }
         isRestTime = true;
     }

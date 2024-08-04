@@ -259,7 +259,7 @@ public abstract class BaseTurret : MonoBehaviour
 
     public void InstallTurret()
     {
-        AdditionalStaticValuesForGame2.GetInstance().SetTurretInstallStatus(turretSpace.rowIndex, turretSpace.columnIndex, true); ;
+        AdditionalStaticValuesForGame2.GetInstance().SetTurret(turretSpace.rowIndex, turretSpace.columnIndex, this); ;
         this.transform.position = spacePos;
         StaticValues.GetInstance().gold -= this.price;
         MakeAttackRangeInvisible();
@@ -320,52 +320,48 @@ public abstract class BaseTurret : MonoBehaviour
         {
             return;
         }
+        if (targetEnemy != null)
+        {
+            if (targetEnemy.hasPassed == true)
+            {
+                DeleteEnemy(targetEnemy);
+                SetTargetEnemy(null);
+            }
+        }
         foreach (var enemyToAttack in enemiesToAttack)
         {
             if (targetEnemy == null)
             {
                 this.targetEnemy = enemyToAttack.Key;
             }
-            if (enemyToAttack.Key.moveDistance > this.targetEnemy.moveDistance)
+            if (enemyToAttack.Key.targetPriority > this.targetEnemy.targetPriority)
             {
                 this.targetEnemy = enemyToAttack.Key;
             }
         }
+
+        if (targetEnemy == null) return;
         var xLength = this.targetEnemy.transform.position.x - this.transform.position.x;
         var yLength = this.targetEnemy.transform.position.y - this.transform.position.y;
         var angle = Math.Atan2(yLength, xLength);
         var toRotation = Quaternion.Euler(0, 0, (float)(angle * 180 / Math.PI));
         this.transform.rotation = Quaternion.Lerp(this.transform.rotation, toRotation, 0.07f);
-        //Debug.Log(targetEnemy);
     }
 
     private void SetTargetEnemy(BaseEnemy enemy)
     {
-        //Debug.Log("SetTargetEnemy " + enemy);
         this.targetEnemy = enemy;
     }
     // enenmy 죽었거나, 영역을 벗어났을 때
     public void DeleteEnemy(BaseEnemy enemy)
     {
-        // queue에 아무것도 없으면
-        if (this.enemiesToAttack.Count == 0) //오류!
+        if (this.enemiesToAttack.Count == 0)
         {
             this.SetTargetEnemy(null);
             return;
         }
         var deletedEnemy = this.enemiesToAttack.Remove(enemy);
         this.SetTargetEnemy(null);
-        // queue는 비어있지 않다. 근데 다음적이 게임 scene에 있는지 없는지 확인이 필요하다.
-        // var nextEnemy = this.enemiesToAttack.;
-        // while (nextEnemy == null && this.enemiesToAttack.Count > 0)
-        // {
-        //     nextEnemy = this.enemiesToAttack.Dequeue();
-        //     if (this.enemiesToAttack.Count == 0)
-        //     {
-        //         nextEnemy = null;
-        //     }
-        // }
-        // this.SetTargetEnemy(nextEnemy);
     }
 
     void MakeAttackRangeVisible()
@@ -398,25 +394,22 @@ public abstract class BaseTurret : MonoBehaviour
 
         Direction direction = Direction.None;
 
-        if (centerPos.x > this.transform.position.x && centerPos.y > this.transform.position.y)
+        if (centerPos.x >= this.transform.position.x && centerPos.y > this.transform.position.y)
         {
             // turret 위치는 왼쪽 아래
             direction = Direction.BottomLeft;
-
         }
-        else if (centerPos.x > this.transform.position.x && centerPos.y < this.transform.position.y)
+        else if (centerPos.x >= this.transform.position.x && centerPos.y <= this.transform.position.y)
         {
             // turret 위치는 왼쪽 위
             direction = Direction.TopLeft;
-
         }
         else if (centerPos.x < this.transform.position.x && centerPos.y > this.transform.position.y)
         {
             // turret 위치는 오른쪽 아래
             direction = Direction.BottomRight;
-
         }
-        else if (centerPos.x < this.transform.position.x && centerPos.y < this.transform.position.y)
+        else if (centerPos.x < this.transform.position.x && centerPos.y <= this.transform.position.y)
         {
             // turret 위치는 오른쪽 위
             direction = Direction.TopRight;
@@ -455,8 +448,6 @@ public abstract class BaseTurret : MonoBehaviour
         RectTransform rectTransform = instantiatedTurretUI.GetComponent<RectTransform>();
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasUI.GetComponent<RectTransform>(), screenPoint, canvasUI.worldCamera, out localPoint);
-        //localPoint.x += rectTransform.rect.width / 2;
-        // localPoint.y -= rectTransform.rect.height / 2;
 
         switch (direction)
         {
@@ -479,15 +470,12 @@ public abstract class BaseTurret : MonoBehaviour
         }
 
         rectTransform.anchoredPosition = localPoint;
-
-        //isShowingUI = true;
     }
 
     public void SellTurret()
     {
-        AdditionalStaticValuesForGame2.GetInstance().SetTurretInstallStatus(turretSpace.rowIndex, turretSpace.columnIndex, false);
+        AdditionalStaticValuesForGame2.GetInstance().SetTurret(turretSpace.rowIndex, turretSpace.columnIndex, this);
         StaticValues.GetInstance().gold += this.sellPrice;
-        //StaticValues.GetInstance().isShowingUI = false;
         this.turretSpace.ShowGetGold(this.upgradePrice, true);
         turretSpace.installedTurret = null;
         turretSpace.isInstalled = false;

@@ -35,25 +35,4 @@ public class SniperTurret : BaseTurret
         var bullet = newBullet.GetComponent<SniperBullet>();
         bullet.Initialize(this.attackPower, this.transform.position);
     }
-
-    // public void UpgradeTurret()
-    // {
-    //     this.attackPower += 1.7f;
-    //     this.attackSpeed += 0.1f;
-    //     upgradeCount += 1;
-    //     // if(upgradeCount >= 3)
-    //     // {
-    //     //     GameObject newTurretGameObject = Instantiate(sniperTurretPrefab, this.transform.position, Quaternion.identity);
-    //     //     //LayerTurret laserTurret= newTurretGameObject.GetComponent<LaserTurret>();
-
-    //     //     turretSpace.installedTurret = laserTurret;
-    //     //     laserTurret.turretSpace = this.turretSpace;
-    //     //     laserTurret.canvasUI = this.canvasUI;
-    //     //     laserTurret.mainCamera = this.mainCamera;
-    //     //     laserTurret.isInstalledTurret = true;
-    //     //     laserTurret.MakeAttackRangeInvisible();
-
-    //     //     Destroy(this.gameObject);
-    //     // }
-    // }
 }

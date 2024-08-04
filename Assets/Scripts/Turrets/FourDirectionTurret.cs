@@ -9,25 +9,24 @@ using UnityEngine;
 public class FourDirectionTurret : BaseTurret
 {
     Quaternion attackRotation;
-    // Start is called before the first frame update
+
     void Start()
     {
         this.attackPower = 1;
         this.attackSpeed = 0.5f;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(!this.isInstalledTurret) return;
-        
+        if (!this.isInstalledTurret) return;
+
         WatchEnemy();
-        if(targetEnemy != null)
+        if (targetEnemy != null)
         {
-            if(attackCoolCount > 2)
+            if (attackCoolCount > 2)
             {
                 attackRotation = this.transform.rotation;
-                AttackEnemy();
+                //AttackEnemy();
                 attackCoolCount = 0;
             }
         }
@@ -43,35 +42,9 @@ public class FourDirectionTurret : BaseTurret
             attackRotation = Quaternion.Euler(0, 0, turretRotation.eulerAngles.z + i);
             var newBullet = Instantiate(bulletPrefab, this.transform.position, attackRotation);
             var bullet = newBullet.GetComponent<Bullet>();
-            bullet.Initialize(this.attackPower,this.transform.position, 0, false);
+            bullet.Initialize(this.attackPower, this.transform.position, 0, false);
         }
 
 
     }
-    // public void UpgradeTurret()
-    // {
-    //     this.attackPower += 1;
-    //     this.attackSpeed += 0.5f;
-    //     upgradeCount += 1;
-
-    //     if(upgradeCount >= 3)
-    //     {
-    //         GameObject newTurretGameObject = Instantiate(cactusTurretPrefab, this.transform.position, Quaternion.identity);
-    //         CactusTurret cactusTurret= newTurretGameObject.GetComponent<CactusTurret>();
-
-    //         turretSpace.installedTurret = cactusTurret;
-    //         cactusTurret.turretSpace = this.turretSpace;
-    //         cactusTurret.canvasUI = this.canvasUI;
-    //         cactusTurret.mainCamera = this.mainCamera;
-    //         cactusTurret.isInstalledTurret = true;
-    //         if (this.turretSpaceDistances != null) {
-    //             cactusTurret.turretSpaceDistances = new Dictionary<TurretSpace, float>(this.turretSpaceDistances);
-    //         } else {
-    //             cactusTurret.turretSpaceDistances = new Dictionary<TurretSpace, float>();
-    //         }
-    //         cactusTurret.MakeAttackRangeInvisible();
-
-    //         Destroy(this.gameObject);
-    //     }
-    // }
 }

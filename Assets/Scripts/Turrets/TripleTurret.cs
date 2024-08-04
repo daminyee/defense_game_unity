@@ -45,10 +45,4 @@ public class TripleTurret : BaseTurret
         var rightbullet = newRightBullet.GetComponent<Bullet>();
         bullet.Initialize(this.attackPower / 3, this.transform.position, 0, false);
     }
-
-    // public override void UpgradeTurret()
-    // {
-    //     this.attackPower += 0.5f;
-    //     this.attackSpeed += 0.5f;
-    // }
 }

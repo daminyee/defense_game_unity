@@ -15,7 +15,6 @@ public class BombItem : MonoBehaviour
 
     }
 
-    // Update is called once per frame
     void Update()
     {
         priceText.text = itemPrice.ToString();
@@ -24,7 +23,6 @@ public class BombItem : MonoBehaviour
     public void BuyThisItem()
     {
         bombObject = Instantiate(bombPrefab, new Vector2(0, 0), Quaternion.identity);
-        //bombItem.transform.position = Vector3.MoveTowards(bombItem.transform.position, new Vector2(0, 0), 1);
         bombObject.GetComponent<Animator>().SetTrigger("Bomb");
         StartCoroutine(BombAnimation());
     }
@@ -35,8 +33,6 @@ public class BombItem : MonoBehaviour
         var enemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (var enemy in enemies)
         {
-            //enemy.GetComponent<BaseEnemy>().Die(); // 골드 획득 O
-
             Destroy(enemy); // 골드 획득 X
             StaticValues.GetInstance().livingEnemyCount -= 1;
         }

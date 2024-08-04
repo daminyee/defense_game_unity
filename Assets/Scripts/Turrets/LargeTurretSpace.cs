@@ -17,6 +17,7 @@ using UnityEngine;
 
 public class LargeTurretSpace : MonoBehaviour
 {
+    public RandomPath randomPath;
     public GameObject spawnBox;
     public Vector2 spawnBoxSize = new Vector2();
 
@@ -45,8 +46,8 @@ public class LargeTurretSpace : MonoBehaviour
         float restDistanceX = spawnBoxSize.x % turretSpaceSize.x;
         float restDistanceY = spawnBoxSize.y % turretSpaceSize.y;
 
-        // Debug.Log("countX:" + turretSpaceCountX);
-        // Debug.Log("countY:" + turretSpaceCountY);
+        Debug.Log("countX:" + turretSpaceCountX);
+        Debug.Log("countY:" + turretSpaceCountY);
 
         AdditionalStaticValuesForGame2.GetInstance().maxTurretSpaceColumnCount = turretSpaceCountX;
         AdditionalStaticValuesForGame2.GetInstance().maxTurretSpaceRowCount = turretSpaceCountY;
@@ -68,10 +69,15 @@ public class LargeTurretSpace : MonoBehaviour
                 installedTurretSpace.GetComponent<TurretSpace>().columnIndex = i;
                 installedTurretSpace.GetComponent<TurretSpace>().rowIndex = j;
 
-                AdditionalStaticValuesForGame2.GetInstance().SetTurretInstallStatus(j, i, false);
+                AdditionalStaticValuesForGame2.GetInstance().SetTurret(j, i, null);
                 Tuple<int, int> index = new Tuple<int, int>(j, i);
                 turretSpaces[index] = installedTurretSpace.GetComponent<TurretSpace>();
                 installedTurretSpace.GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 0.5f);
+                if (randomPath != null)
+                {
+                    turretSpaces[index].TurnOffIsTrigger();
+                    turretSpaces[index].isNotPath = true;
+                }
             }
         }
 
@@ -82,6 +88,12 @@ public class LargeTurretSpace : MonoBehaviour
         var newLocalY = restDistanceY / 2 / topWall.GetComponent<SpriteRenderer>().bounds.size.y;
         topWall.transform.localScale = new Vector3(newLocalX, newLocalY, 1);
         bottomWall.transform.localScale = new Vector3(newLocalX, newLocalY, 1);
+
+        if (GetComponent<RandomPath>())
+        {
+            randomPath.MakeRandomPath();
+            randomPath.MakeRandomPath();
+        }
     }
 
     void Update()

@@ -6,6 +6,7 @@ public class TurretSpace : MonoBehaviour
 {
     public GameObject putOnEffect;
     public bool isInstalled = false;
+    public bool isNotPath = false;
 
     public BaseTurret installedTurret = null;
 
@@ -58,10 +59,6 @@ public class TurretSpace : MonoBehaviour
         RectTransformUtility.ScreenPointToLocalPointInRectangle(installedTurret.canvasUI.GetComponent<RectTransform>(), screenPoint, installedTurret.canvasUI.worldCamera, out localPoint);
         rectTransform.anchoredPosition = localPoint;
 
-        // usedGoldText.GetComponent<RectTransform>().transform.position = textPos;
-        // localPoint.x = 0; // 해당 버튼 위치에 따라서 조정할 필요가 있다
-        // localPoint.y = 0;
-
         StartCoroutine(GoUpAndDestroy(usedGoldText));
     }
 
@@ -76,33 +73,6 @@ public class TurretSpace : MonoBehaviour
         }
         Destroy(usedGoldText);
     }
-    // void OnTriggerEnter2D(Collider2D collider)
-    // {
-    //     var draggingTurret = collider.GetComponent<BaseTurret>();
-
-    //     if(draggingTurret != null && !this.isInstalled)
-    //     {
-    //         HighlightSpace();
-    //         //draggingTurret.isHighlightingAnyTurretSpace = true;
-    //     }
-    // }
-
-    // void OnTriggerStay2D(Collider2D collider)
-    // {
-
-    // }
-
-    // void OnTriggerExit2D(Collider2D collider)
-    // {
-    //     var draggingTurret = collider.GetComponent<BaseTurret>();
-
-    //     if(draggingTurret != null)
-    //     {
-    //         UnhighlightSpace();
-    //         //draggingTurret.isHighlightingAnyTurretSpace = false;
-    //     }
-    // }
-
     public void HighlightSpace()
     {
         if (isInstalled) return;

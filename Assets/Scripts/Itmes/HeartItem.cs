@@ -7,13 +7,11 @@ public class HeartItem : MonoBehaviour
 {
     public int itemPrice;
     public Text priceText;
-    // Start is called before the first frame update
     void Start()
     {
 
     }
 
-    // Update is called once per frame
     void Update()
     {
         priceText.text = itemPrice.ToString();
